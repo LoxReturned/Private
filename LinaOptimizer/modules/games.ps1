@@ -141,7 +141,11 @@ function Get-LinaGamePaths {
 
 function Get-LinaManualGamePaths {
     param([string]$GameKey)
-    $file = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\logs\manual-games.json'
+    $baseRoot = Get-LinaAppRoot
+    if (-not $baseRoot) {
+        return @()
+    }
+    $file = Join-Path $baseRoot 'logs\manual-games.json'
     if (-not (Test-Path $file)) {
         return @()
     }
@@ -153,6 +157,140 @@ function Get-LinaManualGamePaths {
     } catch {
     }
     return @()
+}
+
+function Get-LinaAppRoot {
+    if ($PSScriptRoot) {
+        return (Split-Path -Parent $PSScriptRoot)
+    }
+    if ($env:LINA_APPROOT) {
+        return $env:LINA_APPROOT
+    }
+    return $null
+}
+
+function Set-LinaGameQuality {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param(
+        [Parameter(Mandatory)] [string]$GameKey,
+        [Parameter(Mandatory)] [ValidateSet('Low','Medium','High')] [string]$Quality
+    )
+
+    switch ($GameKey) {
+        'Valorant' { Set-LinaValorantQuality -Quality $Quality }
+        'Fortnite' { Set-LinaFortniteQuality -Quality $Quality }
+        'GTAV' { Set-LinaGTAVQuality -Quality $Quality }
+        'FiveM' { Set-LinaFiveMQuality -Quality $Quality }
+        'Minecraft' { Set-LinaMinecraftQuality -Quality $Quality }
+        'Roblox' { Set-LinaRobloxQuality -Quality $Quality }
+        'RocketLeague' { Set-LinaRocketLeagueQuality -Quality $Quality }
+        'CS2' { Set-LinaCSQuality -Quality $Quality }
+        'CSGO' { Set-LinaCSQuality -Quality $Quality }
+        'Dota2' { Set-LinaDotaQuality -Quality $Quality }
+        'LoL' { Set-LinaLoLQuality -Quality $Quality }
+        'TF2' { Set-LinaCSQuality -Quality $Quality }
+        default { }
+    }
+}
+
+function Set-LinaValorantQuality {
+    param([string]$Quality)
+    $configPath = "$env:LOCALAPPDATA\VALORANT\Saved\Config\Windows\GameUserSettings.ini"
+    if (-not (Test-Path $configPath)) { return }
+    $settings = switch ($Quality) {
+        'Low' { @{ 'OverallScalabilityLevel' = '1'; 'bUseVSync' = 'False' } }
+        'Medium' { @{ 'OverallScalabilityLevel' = '2'; 'bUseVSync' = 'False' } }
+        'High' { @{ 'OverallScalabilityLevel' = '3'; 'bUseVSync' = 'True' } }
+    }
+    foreach ($key in $settings.Keys) {
+        Set-LinaIniValue -Path $configPath -Key $key -Value $settings[$key]
+    }
+}
+
+function Set-LinaFortniteQuality {
+    param([string]$Quality)
+    $configPath = "$env:LOCALAPPDATA\FortniteGame\Saved\Config\WindowsClient\GameUserSettings.ini"
+    if (-not (Test-Path $configPath)) { return }
+    $settings = switch ($Quality) {
+        'Low' { @{ 'sg.ViewDistanceQuality' = '0'; 'sg.ShadowQuality' = '0'; 'sg.TextureQuality' = '0'; 'sg.EffectsQuality' = '0' } }
+        'Medium' { @{ 'sg.ViewDistanceQuality' = '2'; 'sg.ShadowQuality' = '2'; 'sg.TextureQuality' = '2'; 'sg.EffectsQuality' = '2' } }
+        'High' { @{ 'sg.ViewDistanceQuality' = '3'; 'sg.ShadowQuality' = '3'; 'sg.TextureQuality' = '3'; 'sg.EffectsQuality' = '3' } }
+    }
+    foreach ($key in $settings.Keys) {
+        Set-LinaIniValue -Path $configPath -Key $key -Value $settings[$key]
+    }
+}
+
+function Set-LinaGTAVQuality {
+    param([string]$Quality)
+    $settings = "$env:USERPROFILE\Documents\Rockstar Games\GTA V\settings.xml"
+    if (-not (Test-Path $settings)) { return }
+    $value = switch ($Quality) {
+        'Low' { '0' }
+        'Medium' { '2' }
+        'High' { '4' }
+    }
+    (Get-Content $settings) | ForEach-Object { $_ -replace 'ShadowQuality value="\d+"', "ShadowQuality value=`"$value`"" } | Set-Content $settings
+}
+
+function Set-LinaFiveMQuality {
+    param([string]$Quality)
+    $configPath = "$env:APPDATA\CitizenFX\fivem.cfg"
+    if (-not (Test-Path $configPath)) { return }
+    $value = switch ($Quality) { 'Low' { '0' } 'Medium' { '1' } 'High' { '2' } }
+    Set-LinaConfigValue -Path $configPath -Key 'profile_gpu' -Value $value
+}
+
+function Set-LinaMinecraftQuality {
+    param([string]$Quality)
+    $options = "$env:APPDATA\.minecraft\options.txt"
+    if (-not (Test-Path $options)) { return }
+    $distance = switch ($Quality) { 'Low' { '6' } 'Medium' { '10' } 'High' { '16' } }
+    $fancy = switch ($Quality) { 'Low' { 'false' } 'Medium' { 'true' } 'High' { 'true' } }
+    Set-LinaConfigValue -Path $options -Key 'renderDistance' -Value $distance
+    Set-LinaConfigValue -Path $options -Key 'fancyGraphics' -Value $fancy
+}
+
+function Set-LinaRobloxQuality {
+    param([string]$Quality)
+    $value = switch ($Quality) { 'Low' { 1 } 'Medium' { 4 } 'High' { 8 } }
+    New-ItemProperty -Path 'HKCU:\Software\Roblox' -Name 'DFIntGraphicsQualityOverride' -Value $value -PropertyType DWord -Force | Out-Null
+}
+
+function Set-LinaRocketLeagueQuality {
+    param([string]$Quality)
+    $configPath = "$env:USERPROFILE\Documents\My Games\Rocket League\TAGame\Config\TASystemSettings.ini"
+    if (-not (Test-Path $configPath)) { return }
+    $value = switch ($Quality) { 'Low' { '0' } 'Medium' { '2' } 'High' { '3' } }
+    Set-LinaIniValue -Path $configPath -Key 'DetailMode' -Value $value
+}
+
+function Set-LinaCSQuality {
+    param([string]$Quality)
+    $autoexec = "$env:APPDATA\LinaOptimizer\autoexec.cfg"
+    if (-not (Test-Path $autoexec)) { return }
+    $preset = switch ($Quality) {
+        'Low' { 'r_texturequality 0' }
+        'Medium' { 'r_texturequality 1' }
+        'High' { 'r_texturequality 2' }
+    }
+    Add-Content -Path $autoexec -Value $preset
+}
+
+function Set-LinaDotaQuality {
+    param([string]$Quality)
+    $autoexec = "$env:APPDATA\LinaOptimizer\dota_autoexec.cfg"
+    if (-not (Test-Path $autoexec)) { return }
+    $value = switch ($Quality) { 'Low' { '0' } 'Medium' { '1' } 'High' { '2' } }
+    Add-Content -Path $autoexec -Value "r_texture_stream_mip_bias $value"
+}
+
+function Set-LinaLoLQuality {
+    param([string]$Quality)
+    $configPath = "$env:LOCALAPPDATA\Riot Games\League of Legends\Config\game.cfg"
+    if (-not (Test-Path $configPath)) { return }
+    $value = switch ($Quality) { 'Low' { '1' } 'Medium' { '3' } 'High' { '5' } }
+    Set-LinaIniValue -Path $configPath -Key 'GraphicsQuality' -Value $value
 }
 
 function Test-LinaGameInstalled {

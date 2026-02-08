@@ -4,6 +4,7 @@ chcp 65001 | Out-Null
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
 $script:AppRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$env:LINA_APPROOT = $script:AppRoot
 $script:LogRoot = Join-Path $script:AppRoot 'logs'
 if (-not (Test-Path $script:LogRoot)) {
     New-Item -Path $script:LogRoot -ItemType Directory | Out-Null
@@ -108,7 +109,6 @@ function Get-LinaStrings {
             HealthScoreLabel = 'Health score'
             AlertsLabel = 'Alerts & Warnings'
             DetectionLabel = 'Detection'
-            OptimizeAll = 'Optimize All'
             SimToggle = 'Dry Run'
             SimulationOn = 'Dry Run ON'
             SimulationOff = 'Dry Run OFF'
@@ -149,7 +149,6 @@ function Get-LinaStrings {
         HealthScoreLabel = 'Health score'
         AlertsLabel = 'Alertas & Avisos'
         DetectionLabel = 'Detecção'
-        OptimizeAll = 'Otimizar Tudo'
         SimToggle = 'Simulação'
         SimulationOn = 'Dry Run ON'
         SimulationOff = 'Dry Run OFF'
@@ -205,14 +204,13 @@ function New-LinaViewModel {
             Create = $strings.Create
             Open = $strings.Open
             Run = $strings.Run
-            OptimizeAll = $strings.OptimizeAll
             Backup = $strings.Backup
             Restore = $strings.Restore
         }
     }
 }
 
-Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
+Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase -ErrorAction Stop
 [xml]$xaml = Get-Content -Path (Join-Path $script:AppRoot 'ui.xaml') -Raw
 $reader = New-Object System.Xml.XmlNodeReader $xaml
 $window = [Windows.Markup.XamlReader]::Load($reader)
@@ -242,7 +240,6 @@ function Set-UiStrings {
     $window.FindName('HealthScoreLabel').Text = $Strings.HealthScoreLabel
     $window.FindName('AlertsLabel').Text = $Strings.AlertsLabel
     $window.FindName('DetectionLabel').Text = $Strings.DetectionLabel
-    $window.FindName('OptimizeAllButton').Content = $Strings.OptimizeAll
     $window.FindName('SimToggle').Content = $Strings.SimToggle
 }
 
@@ -254,8 +251,19 @@ $window.FindName('StatusText').Text = $strings.StatusReady
 
 function Set-Status {
     param([string]$Message)
+    Add-CommandLog $Message
+}
+
+function Add-CommandLog {
+    param([string]$Message)
     $window.Dispatcher.Invoke([action]{
-        $window.FindName('StatusText').Text = $Message
+        $status = $window.FindName('StatusText')
+        if ($status.Text) {
+            $status.Text = $status.Text + [Environment]::NewLine + $Message
+        } else {
+            $status.Text = $Message
+        }
+        $status.ScrollToEnd()
     })
 }
 
@@ -302,7 +310,7 @@ $window.FindName('SideMenu').AddHandler([System.Windows.Controls.Primitives.Butt
 
 $window.FindName('SystemTweaksPanel').AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler]{
     $toggle = $_.OriginalSource
-    if ($toggle -isnot [System.Windows.Controls.ToggleButton]) {
+    if ($toggle -isnot [System.Windows.Controls.Primitives.ToggleButton]) {
         return
     }
     $key = $toggle.Tag
@@ -311,6 +319,7 @@ $window.FindName('SystemTweaksPanel').AddHandler([System.Windows.Controls.Primit
     }
     $isEnabled = [bool]$toggle.IsChecked
     Set-Status "System: $key"
+    Add-CommandLog "System tweak: $key"
     Invoke-LinaRunspace -Name $key -ScriptBlock {
         param($k, $enabled, $simulation)
         Set-LinaSystemTweak -Key $k -Enabled:$enabled -WhatIf:$simulation
@@ -321,7 +330,7 @@ $window.FindName('SystemTweaksPanel').AddHandler([System.Windows.Controls.Primit
 
 $window.FindName('NetworkTweaksPanel').AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler]{
     $toggle = $_.OriginalSource
-    if ($toggle -isnot [System.Windows.Controls.ToggleButton]) {
+    if ($toggle -isnot [System.Windows.Controls.Primitives.ToggleButton]) {
         return
     }
     $key = $toggle.Tag
@@ -330,6 +339,7 @@ $window.FindName('NetworkTweaksPanel').AddHandler([System.Windows.Controls.Primi
     }
     $isEnabled = [bool]$toggle.IsChecked
     Set-Status "Network: $key"
+    Add-CommandLog "Network tweak: $key"
     Invoke-LinaRunspace -Name "Network-$key" -ScriptBlock {
         param($k, $enabled, $simulation)
         Set-LinaNetworkTweak -Key $k -Enabled:$enabled -WhatIf:$simulation
@@ -340,7 +350,7 @@ $window.FindName('NetworkTweaksPanel').AddHandler([System.Windows.Controls.Primi
 
 $window.FindName('KernelTweaksPanel').AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler]{
     $toggle = $_.OriginalSource
-    if ($toggle -isnot [System.Windows.Controls.ToggleButton]) {
+    if ($toggle -isnot [System.Windows.Controls.Primitives.ToggleButton]) {
         return
     }
     $key = $toggle.Tag
@@ -349,6 +359,7 @@ $window.FindName('KernelTweaksPanel').AddHandler([System.Windows.Controls.Primit
     }
     $isEnabled = [bool]$toggle.IsChecked
     Set-Status "Kernel: $key"
+    Add-CommandLog "Kernel tweak: $key"
     Invoke-LinaRunspace -Name "Kernel-$key" -ScriptBlock {
         param($k, $enabled, $simulation)
         Set-LinaKernelTweak -Key $k -Enabled:$enabled -WhatIf:$simulation
@@ -369,6 +380,7 @@ $window.FindName('GamesPanel').AddHandler([System.Windows.Controls.Primitives.Bu
     }
     if ($action -eq 'Optimize') {
         Set-Status "Game: $gameKey"
+        Add-CommandLog "Game optimize: $gameKey"
         Invoke-LinaRunspace -Name "Game-$gameKey-Optimize" -ScriptBlock {
             param($k, $simulation)
             Invoke-LinaGameOptimization -GameKey $k -WhatIf:$simulation
@@ -378,11 +390,25 @@ $window.FindName('GamesPanel').AddHandler([System.Windows.Controls.Primitives.Bu
     }
     if ($action -eq 'Reset') {
         Set-Status "Game reset: $gameKey"
+        Add-CommandLog "Game reset: $gameKey"
         Invoke-LinaRunspace -Name "Game-$gameKey-Reset" -ScriptBlock {
             param($k, $simulation)
             Reset-LinaGameOptimization -GameKey $k -WhatIf:$simulation
         } -Arguments @($gameKey, $script:Simulation) -OnComplete {
             Set-Status 'Game resetado / Game reset'
+        }
+    }
+    if ($action -eq 'ApplyQuality') {
+        $container = $button.TemplatedParent
+        $qualitySelector = Find-LinaChildControl -Root $container -Name 'QualitySelector'
+        $quality = if ($qualitySelector -and $qualitySelector.SelectedItem) { $qualitySelector.SelectedItem.Content } else { 'Low' }
+        Set-Status "Game quality: $gameKey -> $quality"
+        Add-CommandLog "Game quality: $gameKey -> $quality"
+        Invoke-LinaRunspace -Name "Game-$gameKey-Quality" -ScriptBlock {
+            param($k, $q, $simulation)
+            Set-LinaGameQuality -GameKey $k -Quality $q -WhatIf:$simulation
+        } -Arguments @($gameKey, $quality, $script:Simulation) -OnComplete {
+            Set-Status 'Qualidade aplicada / Quality applied'
         }
     }
 })
@@ -395,6 +421,7 @@ $window.FindName('DebloatPanel').AddHandler([System.Windows.Controls.Primitives.
     if ($button.Tag -match '^Debloat:(\w+)$') {
         $mode = $Matches[1]
         Set-Status "Debloat: $mode"
+        Add-CommandLog "Debloat: $mode"
         Invoke-LinaRunspace -Name "Debloat-$mode" -ScriptBlock {
             param($m, $simulation)
             Invoke-LinaDebloat -Mode $m -WhatIf:$simulation
@@ -406,6 +433,7 @@ $window.FindName('DebloatPanel').AddHandler([System.Windows.Controls.Primitives.
 
 $window.FindName('PowerPlanButton').Add_Click({
     Set-Status 'Power plan'
+    Add-CommandLog 'Power plan: Lina Performance'
     Invoke-LinaRunspace -Name 'PowerPlan' -ScriptBlock {
         param($simulation)
         New-LinaPowerPlan -WhatIf:$simulation
@@ -422,6 +450,7 @@ $window.FindName('BackupPanel').AddHandler([System.Windows.Controls.Primitives.B
     switch ($button.Tag) {
         'RestorePoint' {
             Set-Status 'Restore point'
+            Add-CommandLog 'Backup: Restore point'
             Invoke-LinaRunspace -Name 'RestorePoint' -ScriptBlock {
                 param($simulation)
                 New-LinaRestorePoint -WhatIf:$simulation
@@ -431,6 +460,7 @@ $window.FindName('BackupPanel').AddHandler([System.Windows.Controls.Primitives.B
         }
         'BackupRegistry' {
             Set-Status 'Backup registry'
+            Add-CommandLog 'Backup: Registry'
             Invoke-LinaRunspace -Name 'BackupRegistry' -ScriptBlock {
                 param($simulation)
                 Backup-LinaRegistry -WhatIf:$simulation
@@ -440,6 +470,7 @@ $window.FindName('BackupPanel').AddHandler([System.Windows.Controls.Primitives.B
         }
         'BackupConfigs' {
             Set-Status 'Backup configs'
+            Add-CommandLog 'Backup: Game configs'
             Invoke-LinaRunspace -Name 'BackupConfigs' -ScriptBlock {
                 param($simulation)
                 Backup-LinaGameConfigs -WhatIf:$simulation
@@ -449,6 +480,7 @@ $window.FindName('BackupPanel').AddHandler([System.Windows.Controls.Primitives.B
         }
         'RestoreAll' {
             Set-Status 'Restore all'
+            Add-CommandLog 'Restore: All'
             Invoke-LinaRunspace -Name 'RestoreAll' -ScriptBlock {
                 param($simulation)
                 Restore-LinaAll -WhatIf:$simulation
@@ -456,19 +488,6 @@ $window.FindName('BackupPanel').AddHandler([System.Windows.Controls.Primitives.B
                 Set-Status 'Restauração finalizada / Restore finished'
             }
         }
-    }
-})
-
-$window.FindName('OptimizeAllButton').Add_Click({
-    Set-Status 'Optimize all'
-    Invoke-LinaRunspace -Name 'OptimizeAll' -ScriptBlock {
-        param($simulation)
-        $catalog = Get-LinaSystemTweakCatalog
-        foreach ($key in $catalog.Keys) {
-            Set-LinaSystemTweak -Key $key -Enabled -WhatIf:$simulation
-        }
-    } -Arguments @($script:Simulation) -OnComplete {
-        Set-Status 'Otimização completa / Optimization complete'
     }
 })
 
@@ -483,6 +502,7 @@ $window.FindName('AdvancedPanel').AddHandler([System.Windows.Controls.Primitives
         'UnparkCPU' { Invoke-LinaToolIntegration -Tool 'UnparkCPU' }
         'ParkControl' { Invoke-LinaToolIntegration -Tool 'ParkControl' }
         'DiscordDebloat' {
+            Add-CommandLog 'Discord debloat'
             Invoke-LinaRunspace -Name 'DiscordDebloat' -ScriptBlock {
                 param($simulation)
                 Invoke-LinaDiscordDebloat -WhatIf:$simulation
@@ -529,19 +549,40 @@ function Invoke-LinaToolIntegration {
 
     foreach ($path in $paths) {
         if (Test-Path $path) {
+            Add-CommandLog "Open: $Tool"
             Start-Process $path
             return
         }
     }
 
     if ($url) {
+        Add-CommandLog "Open: $Tool (download)"
         Start-Process $url
     }
 }
 
 $window.FindName('DiscordButton').Add_Click({
+    Add-CommandLog 'Discord: Join'
     Start-Process 'https://discord.gg/CFw33ukueK'
 })
+
+function Find-LinaChildControl {
+    param(
+        [Parameter(Mandatory)] $Root,
+        [Parameter(Mandatory)] [string]$Name
+    )
+    if (-not $Root) { return $null }
+    $count = [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Root)
+    for ($i = 0; $i -lt $count; $i++) {
+        $child = [System.Windows.Media.VisualTreeHelper]::GetChild($Root, $i)
+        if ($child -and $child.Name -eq $Name) {
+            return $child
+        }
+        $result = Find-LinaChildControl -Root $child -Name $Name
+        if ($result) { return $result }
+    }
+    return $null
+}
 
 $window.FindName('CloseButton').Add_Click({
     $window.Close()
