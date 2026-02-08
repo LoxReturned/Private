@@ -137,32 +137,26 @@
       margin-top: 30px; background: #0b0b0b; border: 1px solid var(--glass-border); border-radius: 12px; padding: 16px;
       min-height: 120px; color: var(--text-gray); white-space: pre-wrap; font-size: 0.9rem;
     }
-    .checkbox-wrap { display:flex; gap:12px; align-items:center; cursor:pointer; justify-content:center; }
+    .checkbox-wrap { display:flex; gap:14px; align-items:center; cursor:pointer; justify-content:center; }
     .checkbox-wrap input { position: absolute; opacity: 0; pointer-events: none; }
-    .check-box {
-      width: 22px; height: 22px; border-radius: 6px; background: #0b0b0b; border: 1px solid var(--glass-border);
-      display: inline-flex; align-items: center; justify-content: center; transition: var(--transition); box-shadow: inset 0 0 0 0 rgba(0,0,0,0);
-    }
-    .check-box::after {
-      content: ''; width: 10px; height: 10px; border-radius: 3px; background: transparent; transition: var(--transition);
-      box-shadow: 0 0 0 rgba(0,0,0,0);
-    }
-    .checkbox-wrap input:checked + .check-box {
-      border-color: var(--primary-neon);
-      box-shadow: 0 0 10px rgba(0,243,255,0.6), 0 0 20px rgba(188,19,254,0.4);
-    }
-    .checkbox-wrap input:checked + .check-box::after {
-      background: linear-gradient(90deg, var(--primary-neon), var(--secondary-neon));
-      box-shadow: 0 0 12px rgba(0,243,255,0.7);
-      transform: scale(1.1);
-    }
     .toggle-bar {
-      width: 10px; height: 48px; border-radius: 6px; background: #0b0b0b; border: 1px solid var(--glass-border);
+      width: 14px; height: 56px; border-radius: 8px; background: #0b0b0b; border: 1px solid var(--glass-border);
       transition: var(--transition);
     }
-    .checkbox-wrap input:checked + .check-box + .toggle-bar {
+    .checkbox-wrap input:checked + .toggle-bar {
       background: linear-gradient(180deg, var(--primary-neon), var(--secondary-neon));
       box-shadow: 0 0 12px rgba(0,243,255,0.8);
+    }
+    .category-bar { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 20px 0 30px; }
+    .category-btn {
+      padding: 10px 18px; border-radius: 30px; border: 1px solid var(--glass-border); color: var(--text-gray);
+      background: rgba(255,255,255,0.05); cursor: pointer; font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+      transition: var(--transition); letter-spacing: 1px;
+    }
+    .category-btn.active { color: #000; background: var(--primary-neon); border-color: var(--primary-neon); box-shadow: 0 0 15px rgba(0,243,255,0.6); }
+    .game-card select {
+      background: #0b0b0b; color: var(--text-white); border: 1px solid var(--glass-border); padding: 6px 10px; border-radius: 8px;
+      font-family: 'Rajdhani', sans-serif;
     }
 
     footer {
@@ -214,8 +208,19 @@
         <p>PAINEL TÉCNICO</p>
         <h2>Seleção de <span class="gradient-text">Tweaks</span></h2>
       </div>
+      <div class="category-bar" id="categoryBar"></div>
       <div class="log-panel" id="systemLog">Logs aparecerão aqui.</div>
       <div id="tweakGrid"></div>
+    </div>
+  </section>
+
+  <section id="games">
+    <div class="container">
+      <div class="section-header">
+        <p>GAME CENTER</p>
+        <h2>Otimização de <span class="gradient-text">Jogos</span></h2>
+      </div>
+      <div id="gamesGrid" class="tweak-grid"></div>
     </div>
   </section>
 

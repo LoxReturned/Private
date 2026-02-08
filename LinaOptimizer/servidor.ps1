@@ -85,7 +85,7 @@ function Get-LinaCategoryGroup {
         'kernel|energia|power|cpu|scheduler|memory' { return 'cpu' }
         'drivers|gpu' { return 'gpu' }
         'system|sistema|ui|tasks|serviços|services|update|security|segurança' { return 'system' }
-        default { return 'general' }
+        default { return 'extra' }
     }
 }
 
@@ -113,6 +113,20 @@ while ($listener.IsListening) {
             }
             '^/api/tweaks$' {
                 Send-Json -Response $response -Object (Get-LinaTweaksPayload)
+            }
+            '^/api/games$' {
+                $games = Get-LinaGameProfiles -Language 'pt-BR' | ForEach-Object {
+                    [pscustomobject]@{ key = $_.Key; name = $_.Name; description = $_.Description; detectLabel = $_.DetectLabel }
+                }
+                Send-Json -Response $response -Object $games
+            }
+            '^/api/games/apply$' {
+                $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)
+                $data = $body.ReadToEnd() | ConvertFrom-Json
+                $body.Close()
+                Set-LinaGameQuality -GameKey $data.gameKey -Quality $data.quality -WhatIf:$false
+                Add-ServerLog "Aplicado com sucesso: game $($data.gameKey) qualidade $($data.quality)"
+                Send-Json -Response $response -Object @{ status = 'ok' }
             }
             '^/api/apply$' {
                 $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)
