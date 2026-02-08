@@ -20,22 +20,40 @@ function New-LinaRestorePoint {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param()
     if (-not (Test-LinaRestorePointSupport)) {
-        Write-Output 'Restore point indisponível: System Restore desativado.'
-        return
+        return [pscustomobject]@{
+            Success = $false
+            Message = 'Restore point indisponível: System Restore desativado.'
+        }
     }
     if ($PSCmdlet.ShouldProcess('RestorePoint', 'Create')) {
         try {
             Checkpoint-Computer -Description 'Lina Optimizer Restore Point' -RestorePointType 'MODIFY_SETTINGS'
+            return [pscustomobject]@{
+                Success = $true
+                Message = 'Restore point criado com sucesso.'
+            }
         } catch {
-            Write-Output "Restore point falhou: $_"
+            return [pscustomobject]@{
+                Success = $false
+                Message = "Restore point falhou: $_"
+            }
         }
+    }
+    return [pscustomobject]@{
+        Success = $false
+        Message = 'Restore point não executado.'
     }
 }
 
 function Test-LinaRestorePointSupport {
+    $systemDrive = if ($env:SystemDrive) { "$($env:SystemDrive)\" } else { 'C:\' }
     $policy = Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -ErrorAction SilentlyContinue
     if ($policy.DisableSR -eq 1) {
-        return $false
+        try {
+            Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -Name 'DisableSR' -Value 0 -Force -ErrorAction SilentlyContinue
+        } catch {
+            return $false
+        }
     }
     $service = Get-Service -Name 'srservice' -ErrorAction SilentlyContinue
     if (-not $service) {
@@ -56,7 +74,7 @@ function Test-LinaRestorePointSupport {
         }
     }
     try {
-        Enable-ComputerRestore -Drive 'C:\' -ErrorAction SilentlyContinue | Out-Null
+        Enable-ComputerRestore -Drive $systemDrive -ErrorAction SilentlyContinue | Out-Null
     } catch {
         return $false
     }
