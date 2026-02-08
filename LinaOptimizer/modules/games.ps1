@@ -414,12 +414,12 @@ function Set-LinaConfigValue {
     $content = $content | ForEach-Object {
         if ($_ -match "^$Key") {
             $updated = $true
-            return "$Key:$Value"
+            return "${Key}:$Value"
         }
         $_
     }
     if (-not $updated) {
-        $content += "$Key:$Value"
+        $content += "${Key}:$Value"
     }
     $content | Set-Content $Path
 }
