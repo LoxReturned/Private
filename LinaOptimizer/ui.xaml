@@ -100,7 +100,7 @@
         </Style>
     </Window.Resources>
 
-    <Border CornerRadius="24" Background="{StaticResource PrimaryBrush}" Padding="20" Effect="{StaticResource NeonGlow}">
+    <Border CornerRadius="24" Background="{StaticResource PrimaryBrush}" Padding="20">
         <Border.Effect>
             <DropShadowEffect Color="#FF0C1D2F" BlurRadius="40" ShadowDepth="0" Opacity="0.9" />
         </Border.Effect>
