@@ -55,10 +55,17 @@ function Invoke-LinaDebloat {
     }
 
     if ($Mode -ne 'Light' -and $PSCmdlet.ShouldProcess('Services', 'Disable')) {
-        'DiagTrack','WSearch','SysMain','WaaSMedicSvc' | ForEach-Object {
+        'DiagTrack','WSearch','SysMain','WaaSMedicSvc','RetailDemo','MapsBroker' | ForEach-Object {
             Stop-Service -Name $_ -Force -ErrorAction SilentlyContinue
             Set-Service -Name $_ -StartupType Disabled -ErrorAction SilentlyContinue
         }
+    }
+
+    if ($Mode -in @('Medium','Extreme') -and $PSCmdlet.ShouldProcess('Tasks', 'Disable')) {
+        '\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator',
+        '\\Microsoft\\Windows\\Application Experience\\ProgramDataUpdater',
+        '\\Microsoft\\Windows\\DiskDiagnostic\\Microsoft-Windows-DiskDiagnosticDataCollector' |
+        ForEach-Object { schtasks /Change /TN $_ /Disable | Out-Null }
     }
 
     if ($Mode -eq 'Extreme' -and $PSCmdlet.ShouldProcess('Windows Update', 'Disable')) {
@@ -68,6 +75,13 @@ function Invoke-LinaDebloat {
 
     if ($PSCmdlet.ShouldProcess('Telemetry', 'Block')) {
         Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection' -Name 'AllowTelemetry' -Value 0 -Type DWord -Force
+    }
+
+    if ($Mode -ne 'Light' -and $PSCmdlet.ShouldProcess('OneDrive', 'Remove')) {
+        $oneDrive = "$env:SystemRoot\\System32\\OneDriveSetup.exe"
+        if (Test-Path $oneDrive) {
+            Start-Process $oneDrive '/uninstall' -Wait
+        }
     }
 }
 

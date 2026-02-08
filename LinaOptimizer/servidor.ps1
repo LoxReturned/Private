@@ -61,15 +61,31 @@ function Send-File {
 function Get-LinaTweaksPayload {
     $language = 'pt-BR'
     $system = Get-LinaSystemTweaks -Language $language | ForEach-Object {
-        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = $_.Category; risk = $_.Risk; type = 'system' }
+        $group = Get-LinaCategoryGroup -Category $_.Category -Key $_.Key
+        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = $_.Category; group = $group; risk = $_.Risk; type = 'system' }
     }
     $network = Get-LinaNetworkTweaks -Language $language | ForEach-Object {
-        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Network'; risk = 'Médio'; type = 'network' }
+        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Network'; group = 'internet'; risk = 'Médio'; type = 'network' }
     }
     $kernel = Get-LinaKernelTweaks -Language $language | ForEach-Object {
-        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Kernel'; risk = 'Alto'; type = 'kernel' }
+        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Kernel'; group = 'cpu'; risk = 'Alto'; type = 'kernel' }
     }
-    $system + $network + $kernel
+    $debloat = Get-LinaDebloatModes -Language $language | ForEach-Object {
+        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Debloat'; group = 'debloat'; risk = 'Alto'; type = 'debloat' }
+    }
+    $system + $network + $kernel + $debloat
+}
+
+function Get-LinaCategoryGroup {
+    param([string]$Category, [string]$Key)
+    $categoryValue = if ($Category) { $Category.ToLower() } else { '' }
+    switch -Regex ($categoryValue) {
+        'network|rede' { return 'internet' }
+        'kernel|energia|power|cpu|scheduler|memory' { return 'cpu' }
+        'drivers|gpu' { return 'gpu' }
+        'system|sistema|ui|tasks|serviços|services|update|security|segurança' { return 'system' }
+        default { return 'general' }
+    }
 }
 
 $listener = New-Object System.Net.HttpListener
@@ -102,12 +118,17 @@ while ($listener.IsListening) {
                 $data = $body.ReadToEnd() | ConvertFrom-Json
                 $body.Close()
                 Add-ServerLog 'Aplicando tweaks selecionados'
-                New-LinaRestorePoint -WhatIf:$false
+                try {
+                    New-LinaRestorePoint -WhatIf:$false
+                } catch {
+                    Add-ServerLog "Restore point falhou: $_"
+                }
                 foreach ($tweak in $data.tweaks) {
                     switch ($tweak.type) {
                         'system' { Set-LinaSystemTweak -Key $tweak.key -Enabled -WhatIf:$false }
                         'network' { Set-LinaNetworkTweak -Key $tweak.key -Enabled -WhatIf:$false }
                         'kernel' { Set-LinaKernelTweak -Key $tweak.key -Enabled -WhatIf:$false }
+                        'debloat' { Invoke-LinaDebloat -Mode $tweak.key -WhatIf:$false }
                     }
                     Add-ServerLog "Applied: $($tweak.type) $($tweak.key)"
                 }

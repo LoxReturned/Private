@@ -13,23 +13,49 @@ async function fetchTweaks() {
   const res = await fetch('/api/tweaks');
   const data = await res.json();
   tweakGrid.innerHTML = '';
-  data.forEach(tweak => {
-    const card = document.createElement('div');
-    card.className = 'tweak-card';
-    card.innerHTML = `
-      <label style="display:flex; gap:12px; align-items:flex-start;">
-        <input type="checkbox" data-key="${tweak.key}" data-type="${tweak.type}" />
-        <div>
-          <div class="tweak-title">${tweak.title}</div>
-          <div class="tweak-desc">${tweak.description}</div>
-          <div class="tweak-meta">
-            <span>${tweak.category}</span>
-            <span class="${riskClass(tweak.risk)}">${tweak.risk}</span>
+  const groups = {
+    cpu: 'CPU',
+    gpu: 'GPU',
+    system: 'Sistema',
+    general: 'Geral',
+    internet: 'Internet',
+    debloat: 'Debloat'
+  };
+
+  const grouped = data.reduce((acc, tweak) => {
+    const key = tweak.group || 'general';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(tweak);
+    return acc;
+  }, {});
+
+  Object.keys(groups).forEach(groupKey => {
+    const items = grouped[groupKey] || [];
+    if (!items.length) return;
+    const section = document.createElement('div');
+    section.className = 'tweak-section';
+    section.innerHTML = `<h3>${groups[groupKey]}</h3><div class="tweak-grid" id="grid-${groupKey}"></div>`;
+    tweakGrid.appendChild(section);
+    const grid = section.querySelector('.tweak-grid');
+    items.forEach(tweak => {
+      const card = document.createElement('div');
+      card.className = 'tweak-card';
+      card.innerHTML = `
+        <label class="checkbox-wrap">
+          <input type="checkbox" data-key="${tweak.key}" data-type="${tweak.type}" />
+          <span class="check-box"></span>
+          <div>
+            <div class="tweak-title">${tweak.title}</div>
+            <div class="tweak-desc">${tweak.description}</div>
+            <div class="tweak-meta">
+              <span>${tweak.category}</span>
+              <span class="${riskClass(tweak.risk)}">${tweak.risk}</span>
+            </div>
           </div>
-        </div>
-      </label>
-    `;
-    tweakGrid.appendChild(card);
+        </label>
+      `;
+      grid.appendChild(card);
+    });
   });
 }
 
