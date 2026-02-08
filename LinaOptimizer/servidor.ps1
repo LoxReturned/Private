@@ -92,7 +92,7 @@ function Get-LinaCategoryGroup {
 
 function Add-LinaDetailLog {
     param([string]$Key, [string]$Message)
-    Add-ServerLog "Detalhe $Key: $Message"
+    Add-ServerLog "Detalhe ${Key}: $Message"
 }
 
 function Add-LinaSystemActionLogs {
