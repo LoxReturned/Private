@@ -44,12 +44,13 @@ async function fetchTweaks() {
         <label class="checkbox-wrap">
           <input type="checkbox" data-key="${tweak.key}" data-type="${tweak.type}" />
           <span class="check-box"></span>
+          <span class="toggle-bar"></span>
           <div>
             <div class="tweak-title">${tweak.title}</div>
             <div class="tweak-desc">${tweak.description}</div>
             <div class="tweak-meta">
-              <span>${tweak.category}</span>
               <span class="${riskClass(tweak.risk)}">${tweak.risk}</span>
+              <span>${tweak.category}</span>
             </div>
           </div>
         </label>

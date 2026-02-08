@@ -28,6 +28,7 @@ function Add-ServerLog {
     $script:ServerLog.Enqueue($entry)
     $logFile = Join-Path $script:LogRoot 'lina-server.log'
     Add-Content -Path $logFile -Value $entry
+    Write-Host $entry
 }
 
 function Get-ServerLog {
@@ -130,7 +131,7 @@ while ($listener.IsListening) {
                         'kernel' { Set-LinaKernelTweak -Key $tweak.key -Enabled -WhatIf:$false }
                         'debloat' { Invoke-LinaDebloat -Mode $tweak.key -WhatIf:$false }
                     }
-                    Add-ServerLog "Applied: $($tweak.type) $($tweak.key)"
+                    Add-ServerLog "Aplicado com sucesso: $($tweak.type) $($tweak.key)"
                 }
                 Send-Json -Response $response -Object @{ status = 'ok'; log = (Get-ServerLog) }
             }

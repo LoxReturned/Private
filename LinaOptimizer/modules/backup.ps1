@@ -19,9 +19,48 @@
 function New-LinaRestorePoint {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param()
-    if ($PSCmdlet.ShouldProcess('RestorePoint', 'Create')) {
-        Checkpoint-Computer -Description 'Lina Optimizer Restore Point' -RestorePointType 'MODIFY_SETTINGS'
+    if (-not (Test-LinaRestorePointSupport)) {
+        Write-Output 'Restore point indisponível: System Restore desativado.'
+        return
     }
+    if ($PSCmdlet.ShouldProcess('RestorePoint', 'Create')) {
+        try {
+            Checkpoint-Computer -Description 'Lina Optimizer Restore Point' -RestorePointType 'MODIFY_SETTINGS'
+        } catch {
+            Write-Output "Restore point falhou: $_"
+        }
+    }
+}
+
+function Test-LinaRestorePointSupport {
+    $policy = Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' -ErrorAction SilentlyContinue
+    if ($policy.DisableSR -eq 1) {
+        return $false
+    }
+    $service = Get-Service -Name 'srservice' -ErrorAction SilentlyContinue
+    if (-not $service) {
+        return $false
+    }
+    if ($service.StartType -eq 'Disabled') {
+        try {
+            Set-Service -Name 'srservice' -StartupType Manual -ErrorAction SilentlyContinue
+        } catch {
+            return $false
+        }
+    }
+    if ($service.Status -ne 'Running') {
+        try {
+            Start-Service -Name 'srservice' -ErrorAction SilentlyContinue
+        } catch {
+            return $false
+        }
+    }
+    try {
+        Enable-ComputerRestore -Drive 'C:\' -ErrorAction SilentlyContinue | Out-Null
+    } catch {
+        return $false
+    }
+    return $true
 }
 
 function Backup-LinaRegistry {
