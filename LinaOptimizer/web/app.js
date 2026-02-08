@@ -382,10 +382,12 @@ async function fetchGames() {
     const card = document.createElement('div');
     card.className = 'tweak-card game-card reveal';
     card.innerHTML = `
-      <div class="tweak-title">${game.name}</div>
-      <div class="tweak-desc">${game.description}</div>
-      <div class="tweak-meta">
-        <span>${game.detectLabel}</span>
+      <div class="game-info">
+        <div class="tweak-title">${game.name}</div>
+        <div class="tweak-desc">${game.description}</div>
+        <div class="tweak-meta">
+          <span>${game.detectLabel}</span>
+        </div>
       </div>
       <div class="game-actions">
         <select data-game="${game.key}">
@@ -540,4 +542,75 @@ function markTweaksApplied(keys) {
   const current = new Set(getAppliedTweaks());
   keys.forEach(key => current.add(key));
   localStorage.setItem('linaAppliedTweaks', JSON.stringify(Array.from(current)));
+}
+
+const particleCanvas = document.getElementById('particleCanvas');
+const particleCtx = particleCanvas?.getContext('2d');
+const particles = [];
+const particleSettings = {
+  count: 40,
+  radius: 2,
+  speed: 0.2,
+  repelRadius: 120,
+  repelStrength: 0.6
+};
+let pointer = { x: -9999, y: -9999 };
+
+function resizeParticles() {
+  if (!particleCanvas) return;
+  particleCanvas.width = window.innerWidth;
+  particleCanvas.height = window.innerHeight;
+}
+
+function initParticles() {
+  if (!particleCanvas || !particleCtx) return;
+  particles.length = 0;
+  for (let i = 0; i < particleSettings.count; i += 1) {
+    particles.push({
+      x: Math.random() * particleCanvas.width,
+      y: Math.random() * particleCanvas.height,
+      vx: (Math.random() - 0.5) * particleSettings.speed,
+      vy: (Math.random() - 0.5) * particleSettings.speed
+    });
+  }
+}
+
+function drawParticles() {
+  if (!particleCanvas || !particleCtx) return;
+  particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+  particleCtx.fillStyle = 'rgba(0, 243, 255, 0.35)';
+  particles.forEach(p => {
+    const dx = p.x - pointer.x;
+    const dy = p.y - pointer.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < particleSettings.repelRadius) {
+      const force = (1 - dist / particleSettings.repelRadius) * particleSettings.repelStrength;
+      p.vx += (dx / (dist || 1)) * force;
+      p.vy += (dy / (dist || 1)) * force;
+    }
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 0 || p.x > particleCanvas.width) p.vx *= -1;
+    if (p.y < 0 || p.y > particleCanvas.height) p.vy *= -1;
+    particleCtx.beginPath();
+    particleCtx.arc(p.x, p.y, particleSettings.radius, 0, Math.PI * 2);
+    particleCtx.fill();
+  });
+  requestAnimationFrame(drawParticles);
+}
+
+if (particleCanvas) {
+  resizeParticles();
+  initParticles();
+  drawParticles();
+  window.addEventListener('resize', () => {
+    resizeParticles();
+    initParticles();
+  });
+  window.addEventListener('mousemove', (event) => {
+    pointer = { x: event.clientX, y: event.clientY };
+  });
+  window.addEventListener('mouseleave', () => {
+    pointer = { x: -9999, y: -9999 };
+  });
 }
