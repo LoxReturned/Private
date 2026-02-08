@@ -10,13 +10,13 @@ if (-not (Test-Path $script:LogRoot)) {
 }
 
 $script:ModuleFiles = @(
-    Join-Path $script:AppRoot 'modules/system.ps1',
-    Join-Path $script:AppRoot 'modules/games.ps1',
-    Join-Path $script:AppRoot 'modules/network.ps1',
-    Join-Path $script:AppRoot 'modules/power.ps1',
-    Join-Path $script:AppRoot 'modules/debloat.ps1',
-    Join-Path $script:AppRoot 'modules/kernel.ps1',
-    Join-Path $script:AppRoot 'modules/backup.ps1'
+    (Join-Path $script:AppRoot 'modules\system.ps1'),
+    (Join-Path $script:AppRoot 'modules\games.ps1'),
+    (Join-Path $script:AppRoot 'modules\network.ps1'),
+    (Join-Path $script:AppRoot 'modules\power.ps1'),
+    (Join-Path $script:AppRoot 'modules\debloat.ps1'),
+    (Join-Path $script:AppRoot 'modules\kernel.ps1'),
+    (Join-Path $script:AppRoot 'modules\backup.ps1')
 )
 
 foreach ($module in $script:ModuleFiles) {
