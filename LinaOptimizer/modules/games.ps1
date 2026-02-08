@@ -1,60 +1,169 @@
 ﻿function Get-LinaGameProfiles {
+    param([string]$Language = 'pt-BR')
     $profiles = @(
-        @{ Key = 'Valorant'; Name = 'Valorant'; Description = 'Low graphics, VSync off, prioridade alta.' },
-        @{ Key = 'CS16'; Name = 'Counter-Strike 1.6'; Description = 'Autoexec, launch options, low DX.' },
-        @{ Key = 'CSGO'; Name = 'Counter-Strike: Global Offensive'; Description = 'Autoexec, launch options, low DX.' },
-        @{ Key = 'LoL'; Name = 'League of Legends'; Description = 'Config low, disable eye candy.' },
-        @{ Key = 'Dota2'; Name = 'Dota 2'; Description = 'Launch options e autoexec.' },
-        @{ Key = 'Fortnite'; Name = 'Fortnite'; Description = 'Scalability e shader cache.' },
-        @{ Key = 'Minecraft'; Name = 'Minecraft'; Description = 'Options.txt, JVM flags, RAM.' },
-        @{ Key = 'Roblox'; Name = 'Roblox'; Description = 'Registry graphics e cache.' },
-        @{ Key = 'RocketLeague'; Name = 'Rocket League'; Description = 'TASettings, FPS unlock.' },
-        @{ Key = 'TF2'; Name = 'Team Fortress 2'; Description = 'Autoexec, nojoy, novid.' },
-        @{ Key = 'Stardew'; Name = 'Stardew Valley'; Description = 'Config low, cache cleanup.' },
-        @{ Key = 'AmongUs'; Name = 'Among Us'; Description = 'Config low, cleanup.' },
-        @{ Key = 'Trackmania'; Name = 'Trackmania'; Description = 'Low graphics preset.' },
-        @{ Key = 'Overwatch2'; Name = 'Overwatch 2'; Description = 'Render scale, low config.' },
-        @{ Key = 'Crossfire'; Name = 'Crossfire'; Description = 'Config low, ini cleanup.' }
+        @{ Key = 'FiveM'; NamePT = 'FiveM'; NameEN = 'FiveM'; DescPT = 'Cache, CitizenFX.ini, streaming e rede.'; DescEN = 'Cache, CitizenFX.ini, streaming and network.' },
+        @{ Key = 'GTAV'; NamePT = 'GTA V'; NameEN = 'GTA V'; DescPT = 'Ajustes de graphics e cache.'; DescEN = 'Graphics tweaks and cache.' },
+        @{ Key = 'Valorant'; NamePT = 'Valorant'; NameEN = 'Valorant'; DescPT = 'Config, prioridade e cache.'; DescEN = 'Config, priority and cache.' },
+        @{ Key = 'CS2'; NamePT = 'CS2'; NameEN = 'CS2'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.' },
+        @{ Key = 'CSGO'; NamePT = 'CS:GO'; NameEN = 'CS:GO'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.' },
+        @{ Key = 'LoL'; NamePT = 'League of Legends'; NameEN = 'League of Legends'; DescPT = 'Config low e cache.'; DescEN = 'Low config and cache.' },
+        @{ Key = 'Fortnite'; NamePT = 'Fortnite'; NameEN = 'Fortnite'; DescPT = 'Scalability e shader cache.'; DescEN = 'Scalability and shader cache.' },
+        @{ Key = 'Minecraft'; NamePT = 'Minecraft'; NameEN = 'Minecraft'; DescPT = 'Options, JVM flags e RAM.'; DescEN = 'Options, JVM flags and RAM.' },
+        @{ Key = 'Roblox'; NamePT = 'Roblox'; NameEN = 'Roblox'; DescPT = 'Registry, cache e FPS.'; DescEN = 'Registry, cache and FPS.' },
+        @{ Key = 'RocketLeague'; NamePT = 'Rocket League'; NameEN = 'Rocket League'; DescPT = 'TASettings, FPS unlock.'; DescEN = 'TASettings, FPS unlock.' },
+        @{ Key = 'Overwatch2'; NamePT = 'Overwatch 2'; NameEN = 'Overwatch 2'; DescPT = 'Config low e cache.'; DescEN = 'Low config and cache.' },
+        @{ Key = 'Apex'; NamePT = 'Apex Legends'; NameEN = 'Apex Legends'; DescPT = 'Config low e cache.'; DescEN = 'Low config and cache.' },
+        @{ Key = 'Warzone'; NamePT = 'Warzone'; NameEN = 'Warzone'; DescPT = 'Config, shaders e cache.'; DescEN = 'Config, shaders and cache.' },
+        @{ Key = 'TF2'; NamePT = 'Team Fortress 2'; NameEN = 'Team Fortress 2'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.' },
+        @{ Key = 'Dota2'; NamePT = 'Dota 2'; NameEN = 'Dota 2'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.' }
     )
 
     foreach ($p in $profiles) {
         $installed = Test-LinaGameInstalled -GameKey $p.Key
         $p.DetectLabel = if ($installed) { 'Detectado / Detected' } else { 'Não detectado / Not detected' }
     }
-    $profiles | ForEach-Object { [pscustomobject]$_ }
+
+    $profiles | ForEach-Object {
+        [pscustomobject]@{
+            Key = $_.Key
+            Name = if ($Language -eq 'pt-BR') { $_.NamePT } else { $_.NameEN }
+            Description = if ($Language -eq 'pt-BR') { $_.DescPT } else { $_.DescEN }
+            DetectLabel = $_.DetectLabel
+        }
+    }
+}
+
+function Get-LinaSteamLibraries {
+    $paths = @()
+    $steamPath = "$env:ProgramFiles(x86)\Steam\steamapps\libraryfolders.vdf"
+    if (Test-Path $steamPath) {
+        $content = Get-Content $steamPath
+        foreach ($line in $content) {
+            if ($line -match '"path"\s+"(.+?)"') {
+                $paths += $Matches[1] -replace '\\\\','\\'
+            }
+        }
+    }
+    return $paths
+}
+
+function Get-LinaEpicInstalls {
+    $installs = @()
+    $manifestRoot = "$env:ProgramData\Epic\EpicGamesLauncher\Data\Manifests"
+    if (Test-Path $manifestRoot) {
+        Get-ChildItem -Path $manifestRoot -Filter '*.item' | ForEach-Object {
+            try {
+                $json = Get-Content $_.FullName -Raw | ConvertFrom-Json
+                if ($json.InstallLocation) {
+                    $installs += $json.InstallLocation
+                }
+            } catch {
+            }
+        }
+    }
+    return $installs
+}
+
+function Get-LinaRockstarInstalls {
+    $installs = @()
+    $launcherFile = "$env:ProgramData\Rockstar Games\Launcher\LauncherInstalled.dat"
+    if (Test-Path $launcherFile) {
+        try {
+            $json = Get-Content $launcherFile -Raw | ConvertFrom-Json
+            foreach ($item in $json.InstallationList) {
+                if ($item.InstallLocation) {
+                    $installs += $item.InstallLocation
+                }
+            }
+        } catch {
+        }
+    }
+    return $installs
+}
+
+function Get-LinaRiotInstalls {
+    $paths = @()
+    $riotRoot = "$env:ProgramData\Riot Games"
+    if (Test-Path $riotRoot) {
+        Get-ChildItem -Path $riotRoot -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $paths += $_.FullName
+        }
+    }
+    return $paths
+}
+
+function Get-LinaBattleNetInstalls {
+    $paths = @()
+    $config = "$env:ProgramData\Battle.net\Battle.net.config"
+    if (Test-Path $config) {
+        try {
+            $json = Get-Content $config -Raw | ConvertFrom-Json
+            foreach ($entry in $json.Client.Install) {
+                if ($entry.InstallDir) {
+                    $paths += $entry.InstallDir
+                }
+            }
+        } catch {
+        }
+    }
+    return $paths
+}
+
+function Get-LinaGamePaths {
+    param([string]$GameKey)
+
+    $steamLibraries = Get-LinaSteamLibraries
+    $epicInstalls = Get-LinaEpicInstalls
+    $rockstarInstalls = Get-LinaRockstarInstalls
+    $riotInstalls = Get-LinaRiotInstalls
+    $bnetInstalls = Get-LinaBattleNetInstalls
+    $manualPaths = Get-LinaManualGamePaths -GameKey $GameKey
+
+    switch ($GameKey) {
+        'FiveM' { return @("$env:LOCALAPPDATA\FiveM", "$env:APPDATA\FiveM") + $manualPaths }
+        'GTAV' { return @("$env:ProgramFiles\Rockstar Games\Grand Theft Auto V", "$env:ProgramFiles(x86)\Steam\steamapps\common\Grand Theft Auto V") + $rockstarInstalls + $manualPaths }
+        'Valorant' { return @("$env:ProgramFiles\Riot Vanguard", "$env:LOCALAPPDATA\VALORANT") + $riotInstalls + $manualPaths }
+        'CS2' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\Counter-Strike Global Offensive") + ($steamLibraries | ForEach-Object { Join-Path $_ 'steamapps\common\Counter-Strike Global Offensive' }) + $manualPaths }
+        'CSGO' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\Counter-Strike Global Offensive") + ($steamLibraries | ForEach-Object { Join-Path $_ 'steamapps\common\Counter-Strike Global Offensive' }) + $manualPaths }
+        'LoL' { return @("$env:ProgramFiles\Riot Games\League of Legends") + $riotInstalls + $manualPaths }
+        'Dota2' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\dota 2 beta") + ($steamLibraries | ForEach-Object { Join-Path $_ 'steamapps\common\dota 2 beta' }) + $manualPaths }
+        'Fortnite' { return @("$env:ProgramFiles\Epic Games\Fortnite") + $epicInstalls + $manualPaths }
+        'Minecraft' { return @("$env:APPDATA\.minecraft") + $manualPaths }
+        'Roblox' { return @("$env:LOCALAPPDATA\Roblox") + $manualPaths }
+        'RocketLeague' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\rocketleague") + ($steamLibraries | ForEach-Object { Join-Path $_ 'steamapps\common\rocketleague' }) + $epicInstalls + $manualPaths }
+        'Overwatch2' { return @("$env:ProgramFiles (x86)\Overwatch", "$env:ProgramFiles (x86)\Battle.net") + $bnetInstalls + $manualPaths }
+        'Apex' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\Apex Legends") + ($steamLibraries | ForEach-Object { Join-Path $_ 'steamapps\common\Apex Legends' }) + $manualPaths }
+        'Warzone' { return @("$env:ProgramFiles (x86)\Call of Duty", "$env:USERPROFILE\Documents\Call of Duty") + $bnetInstalls + $manualPaths }
+        'TF2' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\Team Fortress 2") + ($steamLibraries | ForEach-Object { Join-Path $_ 'steamapps\common\Team Fortress 2' }) + $manualPaths }
+        default { return @() }
+    }
+}
+
+function Get-LinaManualGamePaths {
+    param([string]$GameKey)
+    $file = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) '..\logs\manual-games.json'
+    if (-not (Test-Path $file)) {
+        return @()
+    }
+    try {
+        $json = Get-Content $file -Raw | ConvertFrom-Json
+        if ($json.$GameKey) {
+            return @($json.$GameKey)
+        }
+    } catch {
+    }
+    return @()
 }
 
 function Test-LinaGameInstalled {
     param([string]$GameKey)
     $paths = Get-LinaGamePaths -GameKey $GameKey
     foreach ($p in $paths) {
-        if (Test-Path $p) {
+        if ($p -and (Test-Path $p)) {
             return $true
         }
     }
     return $false
-}
-
-function Get-LinaGamePaths {
-    param([string]$GameKey)
-    switch ($GameKey) {
-        'Valorant' { return @("$env:ProgramFiles\Riot Vanguard", "$env:LOCALAPPDATA\VALORANT") }
-        'CS16' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\Half-Life") }
-        'CSGO' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\Counter-Strike Global Offensive") }
-        'LoL' { return @("$env:ProgramFiles\Riot Games\League of Legends") }
-        'Dota2' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\dota 2 beta") }
-        'Fortnite' { return @("$env:ProgramFiles\Epic Games\Fortnite") }
-        'Minecraft' { return @("$env:APPDATA\.minecraft") }
-        'Roblox' { return @("$env:LOCALAPPDATA\Roblox") }
-        'RocketLeague' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\rocketleague") }
-        'TF2' { return @("$env:ProgramFiles(x86)\Steam\steamapps\common\Team Fortress 2") }
-        'Stardew' { return @("$env:APPDATA\StardewValley") }
-        'AmongUs' { return @("$env:APPDATA\InnerSloth\Among Us") }
-        'Trackmania' { return @("$env:ProgramFiles\Trackmania") }
-        'Overwatch2' { return @("$env:ProgramFiles (x86)\Overwatch") }
-        'Crossfire' { return @("$env:ProgramFiles\Crossfire") }
-        default { return @() }
-    }
 }
 
 function Invoke-LinaGameOptimization {
@@ -64,8 +173,10 @@ function Invoke-LinaGameOptimization {
     )
 
     switch ($GameKey) {
+        'FiveM' { Optimize-LinaFiveM }
+        'GTAV' { Optimize-LinaGTAV }
         'Valorant' { Optimize-LinaValorant }
-        'CS16' { Optimize-LinaCS }
+        'CS2' { Optimize-LinaCS }
         'CSGO' { Optimize-LinaCS }
         'LoL' { Optimize-LinaLoL }
         'Dota2' { Optimize-LinaDota2 }
@@ -73,12 +184,10 @@ function Invoke-LinaGameOptimization {
         'Minecraft' { Optimize-LinaMinecraft }
         'Roblox' { Optimize-LinaRoblox }
         'RocketLeague' { Optimize-LinaRocketLeague }
-        'TF2' { Optimize-LinaCS }
-        'Stardew' { Optimize-LinaGeneric -GameKey $GameKey }
-        'AmongUs' { Optimize-LinaGeneric -GameKey $GameKey }
-        'Trackmania' { Optimize-LinaGeneric -GameKey $GameKey }
         'Overwatch2' { Optimize-LinaGeneric -GameKey $GameKey }
-        'Crossfire' { Optimize-LinaGeneric -GameKey $GameKey }
+        'Apex' { Optimize-LinaGeneric -GameKey $GameKey }
+        'Warzone' { Optimize-LinaGeneric -GameKey $GameKey }
+        'TF2' { Optimize-LinaCS }
     }
 }
 
@@ -98,18 +207,50 @@ function Reset-LinaGameOptimization {
     }
 }
 
+function Optimize-LinaFiveM {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param()
+
+    $configPath = "$env:APPDATA\CitizenFX\fivem.cfg"
+    $cachePath = "$env:LOCALAPPDATA\FiveM\FiveM.app\cache"
+
+    if ($PSCmdlet.ShouldProcess('FiveM', 'Tweak')) {
+        if (Test-Path $configPath) {
+            Set-LinaConfigValue -Path $configPath -Key 'cl_drawperf' -Value '1'
+            Set-LinaConfigValue -Path $configPath -Key 'cl_drawfps' -Value '1'
+        }
+        if (Test-Path $cachePath) {
+            Remove-Item -Path $cachePath -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        Set-ProcessPriority -ProcessName 'FiveM' -Priority 'High'
+    }
+}
+
+function Optimize-LinaGTAV {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param()
+    $settings = "$env:USERPROFILE\Documents\Rockstar Games\GTA V\settings.xml"
+    if ($PSCmdlet.ShouldProcess('GTA V', 'Tweak')) {
+        if (Test-Path $settings) {
+            (Get-Content $settings) |
+                ForEach-Object { $_ -replace 'ShadowQuality value="\d+"', 'ShadowQuality value="0"' } |
+                Set-Content $settings
+        }
+        Set-ProcessPriority -ProcessName 'GTA5' -Priority 'High'
+    }
+}
+
 function Optimize-LinaValorant {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param()
     $configPath = "$env:LOCALAPPDATA\VALORANT\Saved\Config\Windows\GameUserSettings.ini"
     if ($PSCmdlet.ShouldProcess('Valorant', 'Tweak')) {
         if (Test-Path $configPath) {
-            (Get-Content $configPath) |
-                ForEach-Object { $_ -replace 'bUseVSync=.*', 'bUseVSync=False' } |
-                Set-Content $configPath
+            Set-LinaIniValue -Path $configPath -Key 'bUseVSync' -Value 'False'
+            Set-LinaIniValue -Path $configPath -Key 'bShouldUseFullscreen' -Value 'True'
         }
         Set-ProcessPriority -ProcessName 'VALORANT-Win64-Shipping' -Priority 'High'
-        Invoke-LinaCacheCleanup
+        Invoke-LinaGameCacheCleanup
     }
 }
 
@@ -123,9 +264,10 @@ function Optimize-LinaCS {
             'fps_max 300',
             'mat_queue_mode 2',
             'r_drawtracers_firstperson 0',
-            'cl_forcepreload 1'
+            'cl_forcepreload 1',
+            'cl_disablehtmlmotd 1'
         ) | Set-Content $autoexec
-        Invoke-LinaCacheCleanup
+        Invoke-LinaGameCacheCleanup
     }
 }
 
@@ -135,12 +277,11 @@ function Optimize-LinaMinecraft {
     $options = "$env:APPDATA\.minecraft\options.txt"
     if ($PSCmdlet.ShouldProcess('Minecraft', 'Tweak')) {
         if (Test-Path $options) {
-            (Get-Content $options) |
-                ForEach-Object { $_ -replace 'fancyGraphics:.*', 'fancyGraphics:false' } |
-                ForEach-Object { $_ -replace 'renderDistance:.*', 'renderDistance:8' } |
-                Set-Content $options
+            Set-LinaConfigValue -Path $options -Key 'fancyGraphics' -Value 'false'
+            Set-LinaConfigValue -Path $options -Key 'renderDistance' -Value '8'
+            Set-LinaConfigValue -Path $options -Key 'particles' -Value '2'
         }
-        Invoke-LinaCacheCleanup
+        Invoke-LinaGameCacheCleanup
     }
 }
 
@@ -149,7 +290,7 @@ function Optimize-LinaRoblox {
     param()
     if ($PSCmdlet.ShouldProcess('Roblox', 'Tweak')) {
         New-ItemProperty -Path 'HKCU:\Software\Roblox' -Name 'DFIntTaskSchedulerTargetFps' -Value 120 -PropertyType DWord -Force | Out-Null
-        Invoke-LinaCacheCleanup
+        Invoke-LinaGameCacheCleanup
     }
 }
 
@@ -159,12 +300,10 @@ function Optimize-LinaFortnite {
     $configPath = "$env:LOCALAPPDATA\FortniteGame\Saved\Config\WindowsClient\GameUserSettings.ini"
     if ($PSCmdlet.ShouldProcess('Fortnite', 'Tweak')) {
         if (Test-Path $configPath) {
-            (Get-Content $configPath) |
-                ForEach-Object { $_ -replace 'bUseVSync=.*', 'bUseVSync=False' } |
-                ForEach-Object { $_ -replace 'FrameRateLimit=.*', 'FrameRateLimit=240.000000' } |
-                Set-Content $configPath
+            Set-LinaIniValue -Path $configPath -Key 'bUseVSync' -Value 'False'
+            Set-LinaIniValue -Path $configPath -Key 'FrameRateLimit' -Value '240.000000'
         }
-        Invoke-LinaCacheCleanup
+        Invoke-LinaGameCacheCleanup
     }
 }
 
@@ -174,11 +313,9 @@ function Optimize-LinaRocketLeague {
     $configPath = "$env:USERPROFILE\Documents\My Games\Rocket League\TAGame\Config\TASystemSettings.ini"
     if ($PSCmdlet.ShouldProcess('RocketLeague', 'Tweak')) {
         if (Test-Path $configPath) {
-            (Get-Content $configPath) |
-                ForEach-Object { $_ -replace 'bVSync=.*', 'bVSync=False' } |
-                Set-Content $configPath
+            Set-LinaIniValue -Path $configPath -Key 'bVSync' -Value 'False'
         }
-        Invoke-LinaCacheCleanup
+        Invoke-LinaGameCacheCleanup
     }
 }
 
@@ -188,11 +325,10 @@ function Optimize-LinaLoL {
     $configPath = "$env:LOCALAPPDATA\Riot Games\League of Legends\Config\game.cfg"
     if ($PSCmdlet.ShouldProcess('LoL', 'Tweak')) {
         if (Test-Path $configPath) {
-            (Get-Content $configPath) |
-                ForEach-Object { $_ -replace 'GraphicsQuality=.*', 'GraphicsQuality=1' } |
-                Set-Content $configPath
+            Set-LinaIniValue -Path $configPath -Key 'GraphicsQuality' -Value '1'
+            Set-LinaIniValue -Path $configPath -Key 'CharacterQuality' -Value '1'
         }
-        Invoke-LinaCacheCleanup
+        Invoke-LinaGameCacheCleanup
     }
 }
 
@@ -205,9 +341,10 @@ function Optimize-LinaDota2 {
         @(
             'fps_max 240',
             'dota_disable_range_finder 1',
-            'dota_minimap_hero_size 600'
+            'dota_minimap_hero_size 600',
+            'r_texture_stream_mip_bias 1'
         ) | Set-Content $autoexec
-        Invoke-LinaCacheCleanup
+        Invoke-LinaGameCacheCleanup
     }
 }
 
@@ -217,23 +354,74 @@ function Optimize-LinaGeneric {
         [Parameter(Mandatory)] [string]$GameKey
     )
     if ($PSCmdlet.ShouldProcess($GameKey, 'Generic Tweak')) {
-        Invoke-LinaCacheCleanup
+        Invoke-LinaGameCacheCleanup
     }
 }
 
-function Invoke-LinaCacheCleanup {
+function Invoke-LinaGameCacheCleanup {
     $paths = @(
         "$env:TEMP",
         "$env:LOCALAPPDATA\Temp",
         "$env:LOCALAPPDATA\D3DSCache",
         "$env:LOCALAPPDATA\NVIDIA\DXCache",
-        "$env:LOCALAPPDATA\AMD\DxCache"
+        "$env:LOCALAPPDATA\AMD\DxCache",
+        "$env:LOCALAPPDATA\FiveM\FiveM.app\cache",
+        "$env:LOCALAPPDATA\FortniteGame\Saved\Config\WindowsClient\ShaderCache",
+        "$env:LOCALAPPDATA\VALORANT\Saved\Logs"
     )
     foreach ($p in $paths) {
         if (Test-Path $p) {
             Get-ChildItem -Path $p -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
         }
     }
+}
+
+function Set-LinaIniValue {
+    param(
+        [Parameter(Mandatory)] [string]$Path,
+        [Parameter(Mandatory)] [string]$Key,
+        [Parameter(Mandatory)] [string]$Value
+    )
+    if (-not (Test-Path $Path)) {
+        return
+    }
+    $content = Get-Content $Path
+    $updated = $false
+    $content = $content | ForEach-Object {
+        if ($_ -match "^$Key=") {
+            $updated = $true
+            return "$Key=$Value"
+        }
+        $_
+    }
+    if (-not $updated) {
+        $content += "$Key=$Value"
+    }
+    $content | Set-Content $Path
+}
+
+function Set-LinaConfigValue {
+    param(
+        [Parameter(Mandatory)] [string]$Path,
+        [Parameter(Mandatory)] [string]$Key,
+        [Parameter(Mandatory)] [string]$Value
+    )
+    if (-not (Test-Path $Path)) {
+        return
+    }
+    $content = Get-Content $Path
+    $updated = $false
+    $content = $content | ForEach-Object {
+        if ($_ -match "^$Key") {
+            $updated = $true
+            return "$Key:$Value"
+        }
+        $_
+    }
+    if (-not $updated) {
+        $content += "$Key:$Value"
+    }
+    $content | Set-Content $Path
 }
 
 function Set-ProcessPriority {

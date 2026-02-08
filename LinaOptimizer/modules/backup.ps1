@@ -1,4 +1,22 @@
-﻿function New-LinaRestorePoint {
+﻿function Get-LinaBackupActions {
+    param([string]$Language = 'pt-BR')
+    $items = @(
+        @{ Key = 'RestorePoint'; TitlePT = 'Restore Point'; TitleEN = 'Restore Point'; DescPT = 'Criar ponto de restauração.'; DescEN = 'Create system restore point.' },
+        @{ Key = 'BackupRegistry'; TitlePT = 'Backup Registry'; TitleEN = 'Backup Registry'; DescPT = 'Salvar registro em arquivo.'; DescEN = 'Save registry to file.' },
+        @{ Key = 'BackupConfigs'; TitlePT = 'Backup Configs'; TitleEN = 'Backup Configs'; DescPT = 'Salvar configs de jogos.'; DescEN = 'Backup game configs.' },
+        @{ Key = 'RestoreAll'; TitlePT = 'Restore All'; TitleEN = 'Restore All'; DescPT = 'Restaurar backups.'; DescEN = 'Restore backups.' }
+    )
+
+    $items | ForEach-Object {
+        [pscustomobject]@{
+            Key = $_.Key
+            Title = if ($Language -eq 'pt-BR') { $_.TitlePT } else { $_.TitleEN }
+            Description = if ($Language -eq 'pt-BR') { $_.DescPT } else { $_.DescEN }
+        }
+    }
+}
+
+function New-LinaRestorePoint {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param()
     if ($PSCmdlet.ShouldProcess('RestorePoint', 'Create')) {
@@ -27,7 +45,10 @@ function Backup-LinaGameConfigs {
             "$env:APPDATA\Valorant",
             "$env:LOCALAPPDATA\FortniteGame",
             "$env:APPDATA\.minecraft",
-            "$env:LOCALAPPDATA\Roblox"
+            "$env:LOCALAPPDATA\Roblox",
+            "$env:LOCALAPPDATA\FiveM",
+            "$env:USERPROFILE\Documents\Rockstar Games\GTA V",
+            "$env:USERPROFILE\Documents\Call of Duty Modern Warfare"
         )
         foreach ($p in $paths) {
             if (Test-Path $p) {

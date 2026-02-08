@@ -9,15 +9,22 @@ if (-not (Test-Path $script:LogRoot)) {
     New-Item -Path $script:LogRoot -ItemType Directory | Out-Null
 }
 
-. (Join-Path $script:AppRoot 'modules/system.ps1')
-. (Join-Path $script:AppRoot 'modules/games.ps1')
-. (Join-Path $script:AppRoot 'modules/network.ps1')
-. (Join-Path $script:AppRoot 'modules/power.ps1')
-. (Join-Path $script:AppRoot 'modules/debloat.ps1')
-. (Join-Path $script:AppRoot 'modules/kernel.ps1')
-. (Join-Path $script:AppRoot 'modules/backup.ps1')
+$script:ModuleFiles = @(
+    Join-Path $script:AppRoot 'modules/system.ps1',
+    Join-Path $script:AppRoot 'modules/games.ps1',
+    Join-Path $script:AppRoot 'modules/network.ps1',
+    Join-Path $script:AppRoot 'modules/power.ps1',
+    Join-Path $script:AppRoot 'modules/debloat.ps1',
+    Join-Path $script:AppRoot 'modules/kernel.ps1',
+    Join-Path $script:AppRoot 'modules/backup.ps1'
+)
+
+foreach ($module in $script:ModuleFiles) {
+    . $module
+}
 
 $script:Simulation = $false
+$script:Language = 'pt-BR'
 $script:RunspacePool = [RunspaceFactory]::CreateRunspacePool(1, [Environment]::ProcessorCount)
 $script:RunspacePool.Open()
 
@@ -41,7 +48,13 @@ function Invoke-LinaRunspace {
     )
     $ps = [PowerShell]::Create()
     $ps.RunspacePool = $script:RunspacePool
-    [void]$ps.AddScript($ScriptBlock).AddArgument($Arguments)
+    [void]$ps.AddScript({
+        param($moduleFiles, $action, $args)
+        foreach ($file in $moduleFiles) {
+            . $file
+        }
+        & $action @args
+    }).AddArgument($script:ModuleFiles).AddArgument($ScriptBlock).AddArgument($Arguments)
 
     $handle = $ps.BeginInvoke()
     Write-LinaLog "Task started: $Name"
@@ -68,44 +81,176 @@ function Invoke-LinaRunspace {
     $timer.Start()
 }
 
-function Get-TextPair {
-    param([string]$PT, [string]$EN)
-    "$PT / $EN"
+function Get-LinaStrings {
+    param([string]$Language)
+    if ($Language -eq 'en-US') {
+        return @{
+            NavDashboard = 'Dashboard'
+            NavSystem = 'System'
+            NavGames = 'Games'
+            NavNetwork = 'Network'
+            NavDebloat = 'Debloat'
+            NavKernel = 'Kernel / Boot'
+            NavPower = 'Power'
+            NavBackup = 'Backup'
+            NavAdvanced = 'Advanced'
+            NavDiscord = 'Discord'
+            DashboardTitle = 'Dashboard'
+            SystemTitle = 'System Tweaks'
+            GamesTitle = 'Game Center'
+            NetworkTitle = 'Network'
+            DebloatTitle = 'Windows Debloat'
+            KernelTitle = 'Kernel / Boot'
+            PowerTitle = 'Power'
+            BackupTitle = 'Backup'
+            AdvancedTitle = 'Advanced Integrations'
+            DiscordTitle = 'Discord'
+            HealthScoreLabel = 'Health score'
+            AlertsLabel = 'Alerts & Warnings'
+            DetectionLabel = 'Detection'
+            OptimizeAll = 'Optimize All'
+            SimToggle = 'Dry Run'
+            SimulationOn = 'Dry Run ON'
+            SimulationOff = 'Dry Run OFF'
+            StatusReady = 'Ready'
+            Continue = 'Continue'
+            GameOptimize = 'Optimize'
+            GameReset = 'Reset'
+            Apply = 'Apply'
+            Create = 'Create'
+            Open = 'Open'
+            Run = 'Run'
+            Backup = 'Backup'
+            Restore = 'Restore'
+        }
+    }
+
+    return @{
+        NavDashboard = 'Dashboard'
+        NavSystem = 'Sistema'
+        NavGames = 'Jogos'
+        NavNetwork = 'Rede'
+        NavDebloat = 'Debloat'
+        NavKernel = 'Kernel / Boot'
+        NavPower = 'Energia'
+        NavBackup = 'Backup'
+        NavAdvanced = 'Avançado'
+        NavDiscord = 'Discord'
+        DashboardTitle = 'Dashboard'
+        SystemTitle = 'Sistema'
+        GamesTitle = 'Game Center'
+        NetworkTitle = 'Rede'
+        DebloatTitle = 'Debloat Windows'
+        KernelTitle = 'Kernel / Boot'
+        PowerTitle = 'Energia'
+        BackupTitle = 'Backup'
+        AdvancedTitle = 'Integrações Avançadas'
+        DiscordTitle = 'Discord'
+        HealthScoreLabel = 'Health score'
+        AlertsLabel = 'Alertas & Avisos'
+        DetectionLabel = 'Detecção'
+        OptimizeAll = 'Otimizar Tudo'
+        SimToggle = 'Simulação'
+        SimulationOn = 'Dry Run ON'
+        SimulationOff = 'Dry Run OFF'
+        StatusReady = 'Pronto'
+        Continue = 'Continuar'
+        GameOptimize = 'Otimizar'
+        GameReset = 'Resetar'
+        Apply = 'Aplicar'
+        Create = 'Criar'
+        Open = 'Abrir'
+        Run = 'Executar'
+        Backup = 'Backup'
+        Restore = 'Restaurar'
+    }
 }
 
-function Get-SystemInfoView {
-    $info = Get-LinaSystemInfo
-    @(
-        [pscustomobject]@{ Label = Get-TextPair 'Windows' 'Windows'; Value = $info.Windows },
-        [pscustomobject]@{ Label = Get-TextPair 'CPU' 'CPU'; Value = $info.CPU },
-        [pscustomobject]@{ Label = Get-TextPair 'GPU' 'GPU'; Value = $info.GPU },
-        [pscustomobject]@{ Label = Get-TextPair 'RAM' 'RAM'; Value = $info.RAM },
-        [pscustomobject]@{ Label = Get-TextPair 'SSD' 'SSD'; Value = $info.SSD },
-        [pscustomobject]@{ Label = Get-TextPair 'Rede' 'Network'; Value = $info.Network },
-        [pscustomobject]@{ Label = Get-TextPair 'Conta' 'Account'; Value = $info.Account },
-        [pscustomobject]@{ Label = Get-TextPair 'BIOS' 'BIOS'; Value = $info.BIOS },
-        [pscustomobject]@{ Label = Get-TextPair 'Driver' 'Driver'; Value = $info.Driver }
-    )
-}
+function New-LinaViewModel {
+    param([string]$Language)
+    $strings = Get-LinaStrings -Language $Language
 
-$viewModel = [pscustomobject]@{
-    AppTitle = 'Lina Optimizer'
-    Tagline = Get-TextPair 'Otimização extrema para Windows e jogos' 'Extreme optimization for Windows and games'
-    SystemInfo = Get-SystemInfoView
-    SystemTweaks = Get-LinaSystemTweaks
-    NetworkTweaks = Get-LinaNetworkTweaks
-    KernelTweaks = Get-LinaKernelTweaks
-    GameList = Get-LinaGameProfiles
-    DebloatModes = Get-LinaDebloatModes
+    [pscustomobject]@{
+        AppTitle = 'Lina Optimizer'
+        Tagline = if ($Language -eq 'pt-BR') { 'Otimização profissional para Windows e jogos' } else { 'Professional optimization for Windows and games' }
+        Dashboard = Get-LinaDashboardSummary
+        SystemInfo = Get-LinaSystemInfoList -Language $Language
+        SystemTweaks = Get-LinaSystemTweaks -Language $Language
+        NetworkTweaks = Get-LinaNetworkTweaks -Language $Language
+        KernelTweaks = Get-LinaKernelTweaks -Language $Language
+        GameList = Get-LinaGameProfiles -Language $Language
+        DebloatModes = Get-LinaDebloatModes -Language $Language
+        BackupActions = Get-LinaBackupActions -Language $Language
+        PowerPlan = [pscustomobject]@{
+            Title = if ($Language -eq 'pt-BR') { 'Plano Lina Performance' } else { 'Lina Performance Plan' }
+            Description = if ($Language -eq 'pt-BR') { 'CPU 100%, C-States off, PCIe off, USB off, GPU max.' } else { 'CPU 100%, C-States off, PCIe off, USB off, GPU max.' }
+        }
+        AdvancedActions = [pscustomobject]@{
+            ProcessLasso = if ($Language -eq 'pt-BR') { 'Abrir Process Lasso se instalado.' } else { 'Open Process Lasso if installed.' }
+            NvidiaInspector = if ($Language -eq 'pt-BR') { 'Abrir NVIDIA Profile Inspector.' } else { 'Open NVIDIA Profile Inspector.' }
+            UnparkCPU = if ($Language -eq 'pt-BR') { 'Abrir Unpark CPU.' } else { 'Open Unpark CPU.' }
+            ParkControl = if ($Language -eq 'pt-BR') { 'Abrir ParkControl.' } else { 'Open ParkControl.' }
+            DiscordDebloat = if ($Language -eq 'pt-BR') { 'Limpar caches e arquivos do Discord.' } else { 'Clean Discord caches and files.' }
+        }
+        DiscordCard = [pscustomobject]@{
+            Title = if ($Language -eq 'pt-BR') { 'Comunidade Lina' } else { 'Lina Community' }
+            Description = if ($Language -eq 'pt-BR') { 'Entre no Discord oficial.' } else { 'Join the official Discord.' }
+        }
+        GameActions = [pscustomobject]@{
+            Optimize = $strings.GameOptimize
+            Reset = $strings.GameReset
+        }
+        ButtonLabels = [pscustomobject]@{
+            Apply = $strings.Apply
+            Create = $strings.Create
+            Open = $strings.Open
+            Run = $strings.Run
+            OptimizeAll = $strings.OptimizeAll
+            Backup = $strings.Backup
+            Restore = $strings.Restore
+        }
+    }
 }
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 [xml]$xaml = Get-Content -Path (Join-Path $script:AppRoot 'ui.xaml') -Raw
 $reader = New-Object System.Xml.XmlNodeReader $xaml
 $window = [Windows.Markup.XamlReader]::Load($reader)
-$window.DataContext = $viewModel
 
-$window.FindName('StatusText').Text = Get-TextPair 'Pronto' 'Ready'
+function Set-UiStrings {
+    param([hashtable]$Strings)
+    $window.FindName('NavDashboard').Content = $Strings.NavDashboard
+    $window.FindName('NavSystem').Content = $Strings.NavSystem
+    $window.FindName('NavGames').Content = $Strings.NavGames
+    $window.FindName('NavNetwork').Content = $Strings.NavNetwork
+    $window.FindName('NavDebloat').Content = $Strings.NavDebloat
+    $window.FindName('NavKernel').Content = $Strings.NavKernel
+    $window.FindName('NavPower').Content = $Strings.NavPower
+    $window.FindName('NavBackup').Content = $Strings.NavBackup
+    $window.FindName('NavAdvanced').Content = $Strings.NavAdvanced
+    $window.FindName('NavDiscord').Content = $Strings.NavDiscord
+    $window.FindName('DashboardTitle').Text = $Strings.DashboardTitle
+    $window.FindName('SystemTitle').Text = $Strings.SystemTitle
+    $window.FindName('GamesTitle').Text = $Strings.GamesTitle
+    $window.FindName('NetworkTitle').Text = $Strings.NetworkTitle
+    $window.FindName('DebloatTitle').Text = $Strings.DebloatTitle
+    $window.FindName('KernelTitle').Text = $Strings.KernelTitle
+    $window.FindName('PowerTitle').Text = $Strings.PowerTitle
+    $window.FindName('BackupTitle').Text = $Strings.BackupTitle
+    $window.FindName('AdvancedTitle').Text = $Strings.AdvancedTitle
+    $window.FindName('DiscordTitle').Text = $Strings.DiscordTitle
+    $window.FindName('HealthScoreLabel').Text = $Strings.HealthScoreLabel
+    $window.FindName('AlertsLabel').Text = $Strings.AlertsLabel
+    $window.FindName('DetectionLabel').Text = $Strings.DetectionLabel
+    $window.FindName('OptimizeAllButton').Content = $Strings.OptimizeAll
+    $window.FindName('SimToggle').Content = $Strings.SimToggle
+}
+
+$viewModel = New-LinaViewModel -Language $script:Language
+$window.DataContext = $viewModel
+$strings = Get-LinaStrings -Language $script:Language
+Set-UiStrings -Strings $strings
+$window.FindName('StatusText').Text = $strings.StatusReady
 
 function Set-Status {
     param([string]$Message)
@@ -115,25 +260,34 @@ function Set-Status {
 }
 
 $window.Add_SourceInitialized({
-    Set-Status (Get-TextPair 'Verificando permissões...' 'Checking permissions...')
     if (-not (Test-LinaAdmin)) {
-        Set-Status (Get-TextPair 'Execute como Administrador' 'Run as Administrator')
+        Set-Status 'Execute como Administrador / Run as Administrator'
     } else {
-        Set-Status (Get-TextPair 'Admin OK' 'Admin OK')
+        Set-Status 'Admin OK'
     }
 })
 
-$window.FindName('ContinueButton').Add_Click({
-    $window.FindName('MainTabs').SelectedIndex = 0
+$window.FindName('LanguageSelector').Add_SelectionChanged({
+    $item = $window.FindName('LanguageSelector').SelectedItem
+    if ($item -and $item.Tag) {
+        $script:Language = $item.Tag
+        $viewModel = New-LinaViewModel -Language $script:Language
+        $window.DataContext = $viewModel
+        $strings = Get-LinaStrings -Language $script:Language
+        Set-UiStrings -Strings $strings
+        Set-Status $strings.StatusReady
+    }
 })
 
 $window.FindName('SimToggle').Add_Checked({
     $script:Simulation = $true
-    Set-Status (Get-TextPair 'Modo simulação ON' 'Simulation mode ON')
+    $strings = Get-LinaStrings -Language $script:Language
+    Set-Status $strings.SimulationOn
 })
 $window.FindName('SimToggle').Add_Unchecked({
     $script:Simulation = $false
-    Set-Status (Get-TextPair 'Modo simulação OFF' 'Simulation mode OFF')
+    $strings = Get-LinaStrings -Language $script:Language
+    Set-Status $strings.SimulationOff
 })
 
 $window.FindName('SideMenu').AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler]{
@@ -156,14 +310,12 @@ $window.FindName('SystemTweaksPanel').AddHandler([System.Windows.Controls.Primit
         return
     }
     $isEnabled = [bool]$toggle.IsChecked
-    $message = if ($isEnabled) { Get-TextPair "Aplicando $key" "Applying $key" } else { Get-TextPair "Revertendo $key" "Reverting $key" }
-    Set-Status $message
+    Set-Status "System: $key"
     Invoke-LinaRunspace -Name $key -ScriptBlock {
-        param($args)
-        $k, $enabled, $simulation = $args
+        param($k, $enabled, $simulation)
         Set-LinaSystemTweak -Key $k -Enabled:$enabled -WhatIf:$simulation
     } -Arguments @($key, $isEnabled, $script:Simulation) -OnComplete {
-        Set-Status (Get-TextPair 'Operação concluída' 'Operation completed')
+        Set-Status 'Operação concluída / Operation completed'
     }
 })
 
@@ -177,13 +329,12 @@ $window.FindName('NetworkTweaksPanel').AddHandler([System.Windows.Controls.Primi
         return
     }
     $isEnabled = [bool]$toggle.IsChecked
-    Set-Status (Get-TextPair "Rede: $key" "Network: $key")
+    Set-Status "Network: $key"
     Invoke-LinaRunspace -Name "Network-$key" -ScriptBlock {
-        param($args)
-        $k, $enabled, $simulation = $args
+        param($k, $enabled, $simulation)
         Set-LinaNetworkTweak -Key $k -Enabled:$enabled -WhatIf:$simulation
     } -Arguments @($key, $isEnabled, $script:Simulation) -OnComplete {
-        Set-Status (Get-TextPair 'Rede atualizada' 'Network updated')
+        Set-Status 'Rede atualizada / Network updated'
     }
 })
 
@@ -197,13 +348,12 @@ $window.FindName('KernelTweaksPanel').AddHandler([System.Windows.Controls.Primit
         return
     }
     $isEnabled = [bool]$toggle.IsChecked
-    Set-Status (Get-TextPair "Kernel: $key" "Kernel: $key")
+    Set-Status "Kernel: $key"
     Invoke-LinaRunspace -Name "Kernel-$key" -ScriptBlock {
-        param($args)
-        $k, $enabled, $simulation = $args
+        param($k, $enabled, $simulation)
         Set-LinaKernelTweak -Key $k -Enabled:$enabled -WhatIf:$simulation
     } -Arguments @($key, $isEnabled, $script:Simulation) -OnComplete {
-        Set-Status (Get-TextPair 'Kernel atualizado' 'Kernel updated')
+        Set-Status 'Kernel atualizado / Kernel updated'
     }
 })
 
@@ -218,23 +368,21 @@ $window.FindName('GamesPanel').AddHandler([System.Windows.Controls.Primitives.Bu
         return
     }
     if ($action -eq 'Optimize') {
-        Set-Status (Get-TextPair "Otimizando $gameKey" "Optimizing $gameKey")
+        Set-Status "Game: $gameKey"
         Invoke-LinaRunspace -Name "Game-$gameKey-Optimize" -ScriptBlock {
-            param($args)
-            $k, $simulation = $args
+            param($k, $simulation)
             Invoke-LinaGameOptimization -GameKey $k -WhatIf:$simulation
         } -Arguments @($gameKey, $script:Simulation) -OnComplete {
-            Set-Status (Get-TextPair 'Game otimizado' 'Game optimized')
+            Set-Status 'Game otimizado / Game optimized'
         }
     }
     if ($action -eq 'Reset') {
-        Set-Status (Get-TextPair "Resetando $gameKey" "Resetting $gameKey")
+        Set-Status "Game reset: $gameKey"
         Invoke-LinaRunspace -Name "Game-$gameKey-Reset" -ScriptBlock {
-            param($args)
-            $k, $simulation = $args
+            param($k, $simulation)
             Reset-LinaGameOptimization -GameKey $k -WhatIf:$simulation
         } -Arguments @($gameKey, $script:Simulation) -OnComplete {
-            Set-Status (Get-TextPair 'Game resetado' 'Game reset')
+            Set-Status 'Game resetado / Game reset'
         }
     }
 })
@@ -246,25 +394,23 @@ $window.FindName('DebloatPanel').AddHandler([System.Windows.Controls.Primitives.
     }
     if ($button.Tag -match '^Debloat:(\w+)$') {
         $mode = $Matches[1]
-        Set-Status (Get-TextPair "Debloat $mode" "Debloat $mode")
+        Set-Status "Debloat: $mode"
         Invoke-LinaRunspace -Name "Debloat-$mode" -ScriptBlock {
-            param($args)
-            $m, $simulation = $args
+            param($m, $simulation)
             Invoke-LinaDebloat -Mode $m -WhatIf:$simulation
         } -Arguments @($mode, $script:Simulation) -OnComplete {
-            Set-Status (Get-TextPair 'Debloat concluído' 'Debloat completed')
+            Set-Status 'Debloat concluído / Debloat completed'
         }
     }
 })
 
 $window.FindName('PowerPlanButton').Add_Click({
-    Set-Status (Get-TextPair 'Criando plano de energia' 'Creating power plan')
+    Set-Status 'Power plan'
     Invoke-LinaRunspace -Name 'PowerPlan' -ScriptBlock {
-        param($args)
-        $simulation = $args[0]
+        param($simulation)
         New-LinaPowerPlan -WhatIf:$simulation
     } -Arguments @($script:Simulation) -OnComplete {
-        Set-Status (Get-TextPair 'Plano aplicado' 'Plan applied')
+        Set-Status 'Plano aplicado / Plan applied'
     }
 })
 
@@ -275,47 +421,123 @@ $window.FindName('BackupPanel').AddHandler([System.Windows.Controls.Primitives.B
     }
     switch ($button.Tag) {
         'RestorePoint' {
-            Set-Status (Get-TextPair 'Criando restore point' 'Creating restore point')
+            Set-Status 'Restore point'
             Invoke-LinaRunspace -Name 'RestorePoint' -ScriptBlock {
-                param($args)
-                $simulation = $args[0]
+                param($simulation)
                 New-LinaRestorePoint -WhatIf:$simulation
             } -Arguments @($script:Simulation) -OnComplete {
-                Set-Status (Get-TextPair 'Restore point criado' 'Restore point created')
+                Set-Status 'Restore point criado / Restore point created'
             }
         }
         'BackupRegistry' {
-            Set-Status (Get-TextPair 'Backup do registro' 'Registry backup')
+            Set-Status 'Backup registry'
             Invoke-LinaRunspace -Name 'BackupRegistry' -ScriptBlock {
-                param($args)
-                $simulation = $args[0]
+                param($simulation)
                 Backup-LinaRegistry -WhatIf:$simulation
             } -Arguments @($script:Simulation) -OnComplete {
-                Set-Status (Get-TextPair 'Backup concluído' 'Backup completed')
+                Set-Status 'Backup concluído / Backup completed'
             }
         }
         'BackupConfigs' {
-            Set-Status (Get-TextPair 'Backup configs' 'Backup configs')
+            Set-Status 'Backup configs'
             Invoke-LinaRunspace -Name 'BackupConfigs' -ScriptBlock {
-                param($args)
-                $simulation = $args[0]
+                param($simulation)
                 Backup-LinaGameConfigs -WhatIf:$simulation
             } -Arguments @($script:Simulation) -OnComplete {
-                Set-Status (Get-TextPair 'Backup concluído' 'Backup completed')
+                Set-Status 'Backup concluído / Backup completed'
             }
         }
         'RestoreAll' {
-            Set-Status (Get-TextPair 'Restaurando tudo' 'Restoring everything')
+            Set-Status 'Restore all'
             Invoke-LinaRunspace -Name 'RestoreAll' -ScriptBlock {
-                param($args)
-                $simulation = $args[0]
+                param($simulation)
                 Restore-LinaAll -WhatIf:$simulation
             } -Arguments @($script:Simulation) -OnComplete {
-                Set-Status (Get-TextPair 'Restauração finalizada' 'Restore finished')
+                Set-Status 'Restauração finalizada / Restore finished'
             }
         }
     }
 })
+
+$window.FindName('OptimizeAllButton').Add_Click({
+    Set-Status 'Optimize all'
+    Invoke-LinaRunspace -Name 'OptimizeAll' -ScriptBlock {
+        param($simulation)
+        $catalog = Get-LinaSystemTweakCatalog
+        foreach ($key in $catalog.Keys) {
+            Set-LinaSystemTweak -Key $key -Enabled -WhatIf:$simulation
+        }
+    } -Arguments @($script:Simulation) -OnComplete {
+        Set-Status 'Otimização completa / Optimization complete'
+    }
+})
+
+$window.FindName('AdvancedPanel').AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler]{
+    $button = $_.OriginalSource
+    if ($button -isnot [System.Windows.Controls.Button]) {
+        return
+    }
+    switch ($button.Tag) {
+        'ProcessLasso' { Invoke-LinaToolIntegration -Tool 'ProcessLasso' }
+        'NvidiaInspector' { Invoke-LinaToolIntegration -Tool 'NvidiaInspector' }
+        'UnparkCPU' { Invoke-LinaToolIntegration -Tool 'UnparkCPU' }
+        'ParkControl' { Invoke-LinaToolIntegration -Tool 'ParkControl' }
+        'DiscordDebloat' {
+            Invoke-LinaRunspace -Name 'DiscordDebloat' -ScriptBlock {
+                param($simulation)
+                Invoke-LinaDiscordDebloat -WhatIf:$simulation
+            } -Arguments @($script:Simulation)
+        }
+    }
+})
+
+function Invoke-LinaToolIntegration {
+    param([string]$Tool)
+    $paths = @()
+    $url = ''
+
+    switch ($Tool) {
+        'ProcessLasso' {
+            $paths = @(
+                "$env:ProgramFiles\Process Lasso\ProcessLasso.exe",
+                "$env:ProgramFiles(x86)\Process Lasso\ProcessLasso.exe"
+            )
+            $url = 'https://bitsum.com/'
+        }
+        'NvidiaInspector' {
+            $paths = @(
+                "$env:ProgramFiles\NVIDIA Corporation\Profile Inspector\nvidiaProfileInspector.exe",
+                "$env:USERPROFILE\Desktop\nvidiaProfileInspector.exe"
+            )
+            $url = 'https://github.com/Orbmu2k/nvidiaProfileInspector'
+        }
+        'UnparkCPU' {
+            $paths = @(
+                "$env:ProgramFiles\Unpark CPU\UnparkCPU.exe",
+                "$env:ProgramFiles(x86)\Unpark CPU\UnparkCPU.exe"
+            )
+            $url = 'https://bitsum.com/'
+        }
+        'ParkControl' {
+            $paths = @(
+                "$env:ProgramFiles\ParkControl\ParkControl.exe",
+                "$env:ProgramFiles(x86)\ParkControl\ParkControl.exe"
+            )
+            $url = 'https://bitsum.com/parkcontrol/'
+        }
+    }
+
+    foreach ($path in $paths) {
+        if (Test-Path $path) {
+            Start-Process $path
+            return
+        }
+    }
+
+    if ($url) {
+        Start-Process $url
+    }
+}
 
 $window.FindName('DiscordButton').Add_Click({
     Start-Process 'https://discord.gg/CFw33ukueK'

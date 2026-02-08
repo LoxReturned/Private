@@ -1,9 +1,18 @@
 ﻿function Get-LinaDebloatModes {
-    @(
-        @{ Key = 'Light'; Title = 'Leve / Light' },
-        @{ Key = 'Medium'; Title = 'Médio / Medium' },
-        @{ Key = 'Extreme'; Title = 'Nuclear / Extreme' }
-    ) | ForEach-Object { [pscustomobject]$_ }
+    param([string]$Language = 'pt-BR')
+    $modes = @(
+        @{ Key = 'Light'; TitlePT = 'Leve'; TitleEN = 'Light'; DescPT = 'Remoção segura de apps básicos.'; DescEN = 'Safe removal of basic apps.' },
+        @{ Key = 'Medium'; TitlePT = 'Médio'; TitleEN = 'Medium'; DescPT = 'Balanceado para performance.'; DescEN = 'Balanced for performance.' },
+        @{ Key = 'Extreme'; TitlePT = 'Nuclear'; TitleEN = 'Extreme'; DescPT = 'Remoção agressiva, use com cautela.'; DescEN = 'Aggressive removal, use with caution.' }
+    )
+
+    $modes | ForEach-Object {
+        [pscustomobject]@{
+            Key = $_.Key
+            Title = if ($Language -eq 'pt-BR') { "$($_.TitlePT) / $($_.TitleEN)" } else { "$($_.TitleEN) / $($_.TitlePT)" }
+            Description = if ($Language -eq 'pt-BR') { $_.DescPT } else { $_.DescEN }
+        }
+    }
 }
 
 function Invoke-LinaDebloat {
@@ -46,7 +55,7 @@ function Invoke-LinaDebloat {
     }
 
     if ($Mode -ne 'Light' -and $PSCmdlet.ShouldProcess('Services', 'Disable')) {
-        'DiagTrack','WSearch','SysMain' | ForEach-Object {
+        'DiagTrack','WSearch','SysMain','WaaSMedicSvc' | ForEach-Object {
             Stop-Service -Name $_ -Force -ErrorAction SilentlyContinue
             Set-Service -Name $_ -StartupType Disabled -ErrorAction SilentlyContinue
         }
@@ -59,5 +68,25 @@ function Invoke-LinaDebloat {
 
     if ($PSCmdlet.ShouldProcess('Telemetry', 'Block')) {
         Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection' -Name 'AllowTelemetry' -Value 0 -Type DWord -Force
+    }
+}
+
+function Invoke-LinaDiscordDebloat {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param()
+
+    $paths = @(
+        "$env:APPDATA\discord\Cache",
+        "$env:APPDATA\discord\Code Cache",
+        "$env:APPDATA\discord\GPUCache",
+        "$env:LOCALAPPDATA\Discord\SquirrelTemp"
+    )
+
+    if ($PSCmdlet.ShouldProcess('Discord', 'Debloat')) {
+        foreach ($p in $paths) {
+            if (Test-Path $p) {
+                Remove-Item -Path $p -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
     }
 }

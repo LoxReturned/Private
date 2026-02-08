@@ -3,84 +3,103 @@
         Title="Lina Optimizer"
         Width="1280" Height="780"
         WindowStartupLocation="CenterScreen"
-        Background="Transparent"
-        AllowsTransparency="True"
+        Background="#FF0D0D0D"
         WindowStyle="None">
     <Window.Resources>
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#FF0E1B2E" />
-        <SolidColorBrush x:Key="AccentBrush" Color="#FF31C8FF" />
-        <SolidColorBrush x:Key="GlowBrush" Color="#FF3BE9FF" />
-        <SolidColorBrush x:Key="CardBrush" Color="#FF11243D" />
-        <SolidColorBrush x:Key="TextBrush" Color="#FFEAF4FF" />
-        <SolidColorBrush x:Key="MutedBrush" Color="#FF9BB2CC" />
-        <DropShadowEffect x:Key="NeonGlow" Color="#FF2EDBFF" BlurRadius="30" ShadowDepth="0" Opacity="0.6" />
-        <Style x:Key="SideButton" TargetType="Button">
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#FF0D0D0D" />
+        <SolidColorBrush x:Key="PanelBrush" Color="#FF141414" />
+        <SolidColorBrush x:Key="CardBrush" Color="#FF1B1B1B" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#FF2A2A2A" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#FF3DA2FF" />
+        <SolidColorBrush x:Key="TextBrush" Color="#FFF2F2F2" />
+        <SolidColorBrush x:Key="MutedBrush" Color="#FFB0B0B0" />
+
+        <Style x:Key="SidebarButton" TargetType="Button">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontSize" Value="15" />
-            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="12" Background="{TemplateBinding Background}">
+                        <Border CornerRadius="6" Background="{TemplateBinding Background}">
                             <ContentPresenter />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#FF1F3C62" />
-                                <Setter Property="Effect" Value="{StaticResource NeonGlow}" />
+                                <Setter Property="Background" Value="#FF1E1E1E" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
         <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Foreground" Value="#FF04141F" />
+            <Setter Property="Foreground" Value="#FFFFFFFF" />
             <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-            <Setter Property="Padding" Value="14,8" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="10" Background="{TemplateBinding Background}" Effect="{StaticResource NeonGlow}">
+                        <Border CornerRadius="6" Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{StaticResource GlowBrush}" />
+                                <Setter Property="Background" Value="#FF2F8EDC" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
         <Style x:Key="CardStyle" TargetType="Border">
             <Setter Property="Background" Value="{StaticResource CardBrush}" />
-            <Setter Property="CornerRadius" Value="16" />
-            <Setter Property="Padding" Value="18" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="16" />
             <Setter Property="Margin" Value="8" />
-            <Setter Property="Effect" Value="{StaticResource NeonGlow}" />
         </Style>
+
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+
+        <Style x:Key="MutedText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
+        </Style>
+
         <Style x:Key="ToggleStyle" TargetType="ToggleButton">
-            <Setter Property="Width" Value="62" />
-            <Setter Property="Height" Value="30" />
+            <Setter Property="Width" Value="56" />
+            <Setter Property="Height" Value="26" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
                         <Grid>
-                            <Border x:Name="Track" CornerRadius="15" Background="#FF1B3150" />
-                            <Ellipse x:Name="Thumb" Width="24" Height="24" Fill="#FF93A9C3" Margin="3" HorizontalAlignment="Left" />
+                            <Border x:Name="Track" CornerRadius="13" Background="#FF2A2A2A" />
+                            <Ellipse x:Name="Thumb" Width="22" Height="22" Fill="#FFB0B0B0" Margin="2" HorizontalAlignment="Left" />
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="Track" Property="Background" Value="{StaticResource AccentBrush}" />
-                                <Setter TargetName="Thumb" Property="Fill" Value="#FF04141F" />
+                                <Setter TargetName="Thumb" Property="Fill" Value="#FFFFFFFF" />
                                 <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -88,22 +107,9 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="SectionTitle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            <Setter Property="FontSize" Value="20" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="Margin" Value="0,0,0,12" />
-        </Style>
-        <Style x:Key="MutedText" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
-            <Setter Property="FontSize" Value="12" />
-        </Style>
     </Window.Resources>
 
-    <Border CornerRadius="24" Background="{StaticResource PrimaryBrush}" Padding="20">
-        <Border.Effect>
-            <DropShadowEffect Color="#FF0C1D2F" BlurRadius="40" ShadowDepth="0" Opacity="0.9" />
-        </Border.Effect>
+    <Border Background="{StaticResource BackgroundBrush}" Padding="16">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="240" />
@@ -115,289 +121,350 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <DockPanel Grid.ColumnSpan="2" LastChildFill="False">
+            <DockPanel Grid.ColumnSpan="2" Margin="0,0,0,12">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                    <TextBlock Text="Lina Optimizer" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                    <TextBlock Text="  ✨" FontSize="22" />
-                    <TextBlock Text="{Binding Tagline}" Margin="12,6,0,0" Foreground="{StaticResource MutedBrush}" />
+                    <TextBlock x:Name="HeaderTitle" Text="Lina Optimizer" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" FontFamily="Segoe UI" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
-                    <ToggleButton x:Name="SimToggle" Content="Simulação / Simulation" Foreground="{StaticResource TextBrush}" Margin="0,0,12,0" />
-                    <Button x:Name="MinimizeButton" Content="—" Width="32" Height="32" Margin="0,0,8,0" />
-                    <Button x:Name="CloseButton" Content="✕" Width="32" Height="32" />
+                    <ComboBox x:Name="LanguageSelector" Width="160" Margin="0,0,12,0">
+                        <ComboBoxItem Content="Português (BR)" Tag="pt-BR" IsSelected="True" />
+                        <ComboBoxItem Content="English (US)" Tag="en-US" />
+                    </ComboBox>
+                    <ToggleButton x:Name="SimToggle" Content="Dry Run" Foreground="{StaticResource TextBrush}" Margin="0,0,12,0" />
+                    <Button x:Name="MinimizeButton" Content="—" Width="32" Height="28" Margin="0,0,8,0" />
+                    <Button x:Name="CloseButton" Content="✕" Width="32" Height="28" />
                 </StackPanel>
             </DockPanel>
 
-            <StackPanel Grid.Row="1" Grid.Column="0" x:Name="SideMenu" Margin="0,20,16,0">
-                <Button Style="{StaticResource SideButton}" Content="Dashboard / Painel" Tag="Tab:0" />
-                <Button Style="{StaticResource SideButton}" Content="Sistema / System" Tag="Tab:1" />
-                <Button Style="{StaticResource SideButton}" Content="Jogos / Games" Tag="Tab:2" />
-                <Button Style="{StaticResource SideButton}" Content="Rede / Network" Tag="Tab:3" />
-                <Button Style="{StaticResource SideButton}" Content="Debloat" Tag="Tab:4" />
-                <Button Style="{StaticResource SideButton}" Content="Kernel / Boot" Tag="Tab:5" />
-                <Button Style="{StaticResource SideButton}" Content="Energia / Power" Tag="Tab:6" />
-                <Button Style="{StaticResource SideButton}" Content="Backup" Tag="Tab:7" />
-                <Button Style="{StaticResource SideButton}" Content="Avançado / Advanced" Tag="Tab:8" />
-                <Button Style="{StaticResource SideButton}" Content="Discord" Tag="Tab:9" />
-            </StackPanel>
+            <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource PanelBrush}" CornerRadius="8" Padding="10" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                <StackPanel x:Name="SideMenu">
+                    <Button x:Name="NavDashboard" Style="{StaticResource SidebarButton}" Tag="Tab:0" />
+                    <Button x:Name="NavSystem" Style="{StaticResource SidebarButton}" Tag="Tab:1" />
+                    <Button x:Name="NavGames" Style="{StaticResource SidebarButton}" Tag="Tab:2" />
+                    <Button x:Name="NavNetwork" Style="{StaticResource SidebarButton}" Tag="Tab:3" />
+                    <Button x:Name="NavDebloat" Style="{StaticResource SidebarButton}" Tag="Tab:4" />
+                    <Button x:Name="NavKernel" Style="{StaticResource SidebarButton}" Tag="Tab:5" />
+                    <Button x:Name="NavPower" Style="{StaticResource SidebarButton}" Tag="Tab:6" />
+                    <Button x:Name="NavBackup" Style="{StaticResource SidebarButton}" Tag="Tab:7" />
+                    <Button x:Name="NavAdvanced" Style="{StaticResource SidebarButton}" Tag="Tab:8" />
+                    <Button x:Name="NavDiscord" Style="{StaticResource SidebarButton}" Tag="Tab:9" />
+                </StackPanel>
+            </Border>
 
-            <TabControl Grid.Row="1" Grid.Column="1" x:Name="MainTabs" Margin="0,20,0,0" Background="Transparent" BorderThickness="0">
-                <TabControl.Resources>
-                    <Style TargetType="TabItem">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                    </Style>
-                </TabControl.Resources>
+            <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource PanelBrush}" CornerRadius="8" Padding="14" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                <TabControl x:Name="MainTabs" Background="Transparent" BorderThickness="0">
+                    <TabControl.Resources>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Style>
+                    </TabControl.Resources>
 
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Smart Detection / Detecção Inteligente" Style="{StaticResource SectionTitle}" />
-                            <ItemsControl ItemsSource="{Binding SystemInfo}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource CardStyle}" Width="220">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Label}" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                <TextBlock Text="{Binding Value}" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <Button x:Name="ContinueButton" Content="▶ Continuar / Continue" Style="{StaticResource PrimaryButton}" Width="220" Margin="8" />
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock x:Name="DashboardTitle" Style="{StaticResource SectionTitle}" />
+                                <WrapPanel>
+                                    <Border Style="{StaticResource CardStyle}" Width="280">
+                                        <StackPanel>
+                                            <TextBlock x:Name="HealthScoreLabel" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding Dashboard.HealthScore}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" />
+                                            <TextBlock Text="{Binding Dashboard.HealthMessage}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="360">
+                                        <StackPanel>
+                                            <TextBlock x:Name="AlertsLabel" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <ItemsControl ItemsSource="{Binding Dashboard.Alerts}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="• {Binding}" Style="{StaticResource MutedText}" />
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="360">
+                                        <StackPanel>
+                                            <TextBlock x:Name="DetectionLabel" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <ItemsControl ItemsSource="{Binding SystemInfo}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding Label}" Style="{StaticResource MutedText}" />
+                                                            <TextBlock Text="{Binding Value}" Style="{StaticResource MutedText}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </WrapPanel>
+                                <Button x:Name="OptimizeAllButton" Style="{StaticResource PrimaryButton}" Width="200" Margin="8" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
 
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Sistema / System" Style="{StaticResource SectionTitle}" />
-                            <ItemsControl ItemsSource="{Binding SystemTweaks}" x:Name="SystemTweaksPanel">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource CardStyle}" Width="320">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                                <ToggleButton Tag="{Binding Key}" Style="{StaticResource ToggleStyle}" Margin="0,10,0,0" />
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Jogos / Games" Style="{StaticResource SectionTitle}" />
-                            <ItemsControl ItemsSource="{Binding GameList}" x:Name="GamesPanel">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource CardStyle}" Width="360">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                                <TextBlock Text="{Binding DetectLabel}" Style="{StaticResource MutedText}" Margin="0,6,0,0" />
-                                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                                    <Button Content="Otimizar / Optimize" Tag="Optimize" CommandParameter="{Binding Key}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" />
-                                                    <Button Content="Resetar / Reset" Tag="Reset" CommandParameter="{Binding Key}" Style="{StaticResource PrimaryButton}" />
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock x:Name="SystemTitle" Style="{StaticResource SectionTitle}" />
+                                <ItemsControl ItemsSource="{Binding SystemTweaks}" x:Name="SystemTweaksPanel">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource CardStyle}" Width="360">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                                    <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                        <TextBlock Text="{Binding Category}" Style="{StaticResource MutedText}" />
+                                                        <TextBlock Text=" | " Style="{StaticResource MutedText}" />
+                                                        <TextBlock Text="{Binding Risk}" Style="{StaticResource MutedText}" />
+                                                    </StackPanel>
+                                                    <ToggleButton Tag="{Binding Key}" Style="{StaticResource ToggleStyle}" Margin="0,10,0,0" />
                                                 </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
 
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Rede / Network" Style="{StaticResource SectionTitle}" />
-                            <ItemsControl ItemsSource="{Binding NetworkTweaks}" x:Name="NetworkTweaksPanel">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource CardStyle}" Width="320">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                                <ToggleButton Tag="{Binding Key}" Style="{StaticResource ToggleStyle}" Margin="0,10,0,0" />
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock x:Name="GamesTitle" Style="{StaticResource SectionTitle}" />
+                                <ItemsControl ItemsSource="{Binding GameList}" x:Name="GamesPanel">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource CardStyle}" Width="380">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                                    <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding DetectLabel}" Style="{StaticResource MutedText}" Margin="0,6,0,0" />
+                                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                    <Button Content="{Binding DataContext.GameActions.Optimize, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="Optimize" CommandParameter="{Binding Key}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" />
+                                                    <Button Content="{Binding DataContext.GameActions.Reset, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="Reset" CommandParameter="{Binding Key}" Style="{StaticResource PrimaryButton}" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
 
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel x:Name="DebloatPanel">
-                            <TextBlock Text="Debloat Windows" Style="{StaticResource SectionTitle}" />
-                            <WrapPanel>
-                                <Border Style="{StaticResource CardStyle}" Width="300">
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock x:Name="NetworkTitle" Style="{StaticResource SectionTitle}" />
+                                <ItemsControl ItemsSource="{Binding NetworkTweaks}" x:Name="NetworkTweaksPanel">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource CardStyle}" Width="320">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                                    <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                                    <ToggleButton Tag="{Binding Key}" Style="{StaticResource ToggleStyle}" Margin="0,10,0,0" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="DebloatPanel">
+                                <TextBlock x:Name="DebloatTitle" Style="{StaticResource SectionTitle}" />
+                                <WrapPanel>
+                                    <Border Style="{StaticResource CardStyle}" Width="320">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DebloatModes[0].Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding DebloatModes[0].Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Apply, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="Debloat:Light" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="320">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DebloatModes[1].Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding DebloatModes[1].Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Apply, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="Debloat:Medium" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="320">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DebloatModes[2].Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding DebloatModes[2].Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Apply, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="Debloat:Extreme" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </WrapPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock x:Name="KernelTitle" Style="{StaticResource SectionTitle}" />
+                                <ItemsControl ItemsSource="{Binding KernelTweaks}" x:Name="KernelTweaksPanel">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource CardStyle}" Width="320">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                                    <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                                    <ToggleButton Tag="{Binding Key}" Style="{StaticResource ToggleStyle}" Margin="0,10,0,0" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock x:Name="PowerTitle" Style="{StaticResource SectionTitle}" />
+                                <Border Style="{StaticResource CardStyle}" Width="360">
                                     <StackPanel>
-                                        <TextBlock Text="Leve / Light" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                        <TextBlock Text="Remoção segura com foco em apps básicos." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                        <Button Content="Aplicar / Apply" Tag="Debloat:Light" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        <TextBlock Text="{Binding PowerPlan.Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock Text="{Binding PowerPlan.Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                    <Button x:Name="PowerPlanButton" Content="{Binding ButtonLabels.Create}" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
                                     </StackPanel>
                                 </Border>
-                                <Border Style="{StaticResource CardStyle}" Width="300">
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="BackupPanel">
+                                <TextBlock x:Name="BackupTitle" Style="{StaticResource SectionTitle}" />
+                                <WrapPanel>
+                                    <Border Style="{StaticResource CardStyle}" Width="320">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding BackupActions[0].Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding BackupActions[0].Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Create, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="RestorePoint" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="320">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding BackupActions[1].Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding BackupActions[1].Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Backup, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="BackupRegistry" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="320">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding BackupActions[2].Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding BackupActions[2].Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Backup, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="BackupConfigs" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="320">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding BackupActions[3].Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding BackupActions[3].Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Restore, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="RestoreAll" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </WrapPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="AdvancedPanel">
+                                <TextBlock x:Name="AdvancedTitle" Style="{StaticResource SectionTitle}" />
+                                <WrapPanel>
+                                    <Border Style="{StaticResource CardStyle}" Width="360">
+                                        <StackPanel>
+                                            <TextBlock Text="Process Lasso" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding AdvancedActions.ProcessLasso}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Open, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="ProcessLasso" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="360">
+                                        <StackPanel>
+                                            <TextBlock Text="NVIDIA Profile Inspector" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding AdvancedActions.NvidiaInspector}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Open, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="NvidiaInspector" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="360">
+                                        <StackPanel>
+                                            <TextBlock Text="Unpark CPU" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding AdvancedActions.UnparkCPU}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Open, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="UnparkCPU" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="360">
+                                        <StackPanel>
+                                            <TextBlock Text="ParkControl" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding AdvancedActions.ParkControl}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Open, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="ParkControl" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource CardStyle}" Width="360">
+                                        <StackPanel>
+                                            <TextBlock Text="Discord Debloat" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                            <TextBlock Text="{Binding AdvancedActions.DiscordDebloat}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                            <Button Content="{Binding DataContext.ButtonLabels.Run, RelativeSource={RelativeSource AncestorType=TabControl}}" Tag="DiscordDebloat" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </WrapPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <TabItem>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock x:Name="DiscordTitle" Style="{StaticResource SectionTitle}" />
+                                <Border Style="{StaticResource CardStyle}" Width="360">
                                     <StackPanel>
-                                        <TextBlock Text="Médio / Medium" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                        <TextBlock Text="Balanceado para performance e estabilidade." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                        <Button Content="Aplicar / Apply" Tag="Debloat:Medium" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
+                                        <TextBlock Text="{Binding DiscordCard.Title}" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" />
+                                        <TextBlock Text="{Binding DiscordCard.Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+                                        <Button x:Name="DiscordButton" Content="{Binding ButtonLabels.Open}" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
                                     </StackPanel>
                                 </Border>
-                                <Border Style="{StaticResource CardStyle}" Width="300">
-                                    <StackPanel>
-                                        <TextBlock Text="Nuclear / Extreme" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                        <TextBlock Text="Remoção agressiva, use com cautela." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                        <Button Content="Aplicar / Apply" Tag="Debloat:Extreme" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
-                                    </StackPanel>
-                                </Border>
-                            </WrapPanel>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
+            </Border>
 
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Kernel / Boot" Style="{StaticResource SectionTitle}" />
-                            <ItemsControl ItemsSource="{Binding KernelTweaks}" x:Name="KernelTweaksPanel">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Style="{StaticResource CardStyle}" Width="320">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Title}" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                                <ToggleButton Tag="{Binding Key}" Style="{StaticResource ToggleStyle}" Margin="0,10,0,0" />
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Energia / Power" Style="{StaticResource SectionTitle}" />
-                            <Border Style="{StaticResource CardStyle}" Width="360">
-                                <StackPanel>
-                                    <TextBlock Text="Plano Lina Max" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                    <TextBlock Text="CPU 100%, PCIe off, USB suspend off, GPU max." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                    <Button x:Name="PowerPlanButton" Content="Criar Plano / Create Plan" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel x:Name="BackupPanel">
-                            <TextBlock Text="Backup" Style="{StaticResource SectionTitle}" />
-                            <WrapPanel>
-                                <Border Style="{StaticResource CardStyle}" Width="300">
-                                    <StackPanel>
-                                        <TextBlock Text="Restore Point" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                        <TextBlock Text="Criar ponto de restauração do Windows." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                        <Button Content="Criar / Create" Tag="RestorePoint" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Style="{StaticResource CardStyle}" Width="300">
-                                    <StackPanel>
-                                        <TextBlock Text="Backup Registry" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                        <TextBlock Text="Salvar registro em arquivo seguro." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                        <Button Content="Backup / Backup" Tag="BackupRegistry" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Style="{StaticResource CardStyle}" Width="300">
-                                    <StackPanel>
-                                        <TextBlock Text="Backup Configs" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                        <TextBlock Text="Salvar configs e perfis de jogos." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                        <Button Content="Backup / Backup" Tag="BackupConfigs" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Style="{StaticResource CardStyle}" Width="300">
-                                    <StackPanel>
-                                        <TextBlock Text="Restore All" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                        <TextBlock Text="Restaurar backups e reverter tweaks." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                        <Button Content="Restaurar / Restore" Tag="RestoreAll" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
-                                    </StackPanel>
-                                </Border>
-                            </WrapPanel>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Avançado / Advanced" Style="{StaticResource SectionTitle}" />
-                            <Border Style="{StaticResource CardStyle}" Width="420">
-                                <StackPanel>
-                                    <TextBlock Text="Modo Avançado" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                    <TextBlock Text="Use os toggles nas abas para ajustes extremos." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-                <TabItem>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Discord" Style="{StaticResource SectionTitle}" />
-                            <Border Style="{StaticResource CardStyle}" Width="360">
-                                <StackPanel>
-                                    <TextBlock Text="Comunidade Lina" FontWeight="Bold" Foreground="{StaticResource TextBrush}" />
-                                    <TextBlock Text="Entre no Discord oficial." Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-                                    <Button x:Name="DiscordButton" Content="Entrar no Discord / Join Discord" Style="{StaticResource PrimaryButton}" Margin="0,10,0,0" />
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-            </TabControl>
-
-            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#FF0B1424" CornerRadius="12" Padding="10" Margin="0,16,0,0">
-                <TextBlock x:Name="StatusText" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+            <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#FF151515" CornerRadius="6" Padding="8" Margin="0,12,0,0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                <TextBlock x:Name="StatusText" Foreground="{StaticResource MutedBrush}" FontSize="12" FontFamily="Segoe UI" />
             </Border>
         </Grid>
     </Border>
