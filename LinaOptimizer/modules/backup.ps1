@@ -18,7 +18,9 @@
 
 function New-LinaRestorePoint {
     [CmdletBinding(SupportsShouldProcess = $true)]
-    param()
+    param(
+        [string]$Name = 'Lina Optimizer Restore Point'
+    )
     if (-not (Test-LinaRestorePointSupport)) {
         return [pscustomobject]@{
             Success = $false
@@ -27,7 +29,8 @@ function New-LinaRestorePoint {
     }
     if ($PSCmdlet.ShouldProcess('RestorePoint', 'Create')) {
         try {
-            Checkpoint-Computer -Description 'Lina Optimizer Restore Point' -RestorePointType 'MODIFY_SETTINGS'
+            $description = if ([string]::IsNullOrWhiteSpace($Name)) { 'Lina Optimizer Restore Point' } else { $Name }
+            Checkpoint-Computer -Description $description -RestorePointType 'MODIFY_SETTINGS'
             return [pscustomobject]@{
                 Success = $true
                 Message = 'Restore point criado com sucesso.'

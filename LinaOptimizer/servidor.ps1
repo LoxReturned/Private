@@ -292,6 +292,17 @@ while ($listener.IsListening) {
                 Add-ServerLog "Revertido com sucesso: game $($data.gameKey)"
                 Send-Json -Response $response -Object @{ status = 'ok' }
             }
+            '^/api/restorepoint$' {
+                $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)
+                $data = $body.ReadToEnd() | ConvertFrom-Json
+                $body.Close()
+                $name = if ($data -and $data.name) { $data.name } else { 'Lina Optimizer Restore Point' }
+                $restore = New-LinaRestorePoint -Name $name -WhatIf:$false
+                if ($restore -and $restore.Message) {
+                    Add-ServerLog $restore.Message
+                }
+                Send-Json -Response $response -Object @{ status = if ($restore.Success) { 'ok' } else { 'error' }; message = $restore.Message }
+            }
             '^/api/apply$' {
                 $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)
                 $data = $body.ReadToEnd() | ConvertFrom-Json

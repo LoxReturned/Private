@@ -19,6 +19,11 @@ const translations = {
     community: 'Comunidade',
     applyTweaks: 'Aplicar Tweaks',
     refreshHardware: 'Atualizar Hardware',
+    restorePoint: 'Criar Ponto',
+    restoreTitle: 'Criar ponto de restauração',
+    restoreDesc: 'Digite um nome para o ponto de restauração.',
+    restoreApply: 'Aplicar',
+    restoreClose: 'Fechar',
     hardwareLoading: 'Carregando hardware...',
     panelTitle: 'Seleção de Tweaks',
     panelLabel: 'PAINEL TÉCNICO',
@@ -54,6 +59,11 @@ const translations = {
     community: 'Community',
     applyTweaks: 'Apply Tweaks',
     refreshHardware: 'Refresh Hardware',
+    restorePoint: 'Create Restore Point',
+    restoreTitle: 'Create restore point',
+    restoreDesc: 'Enter a name for the restore point.',
+    restoreApply: 'Apply',
+    restoreClose: 'Close',
     hardwareLoading: 'Loading hardware...',
     panelTitle: 'Tweak Selection',
     panelLabel: 'TECH PANEL',
@@ -89,6 +99,11 @@ const translations = {
     community: 'Comunidad',
     applyTweaks: 'Aplicar Tweaks',
     refreshHardware: 'Actualizar Hardware',
+    restorePoint: 'Crear punto',
+    restoreTitle: 'Crear punto de restauración',
+    restoreDesc: 'Introduce un nombre para el punto de restauración.',
+    restoreApply: 'Aplicar',
+    restoreClose: 'Cerrar',
     hardwareLoading: 'Cargando hardware...',
     panelTitle: 'Selección de Tweaks',
     panelLabel: 'PANEL TÉCNICO',
@@ -124,6 +139,11 @@ const translations = {
     community: 'Community',
     applyTweaks: 'Tweaks anwenden',
     refreshHardware: 'Hardware aktualisieren',
+    restorePoint: 'Wiederherstellungspunkt',
+    restoreTitle: 'Wiederherstellungspunkt erstellen',
+    restoreDesc: 'Geben Sie einen Namen für den Wiederherstellungspunkt ein.',
+    restoreApply: 'Anwenden',
+    restoreClose: 'Schließen',
     hardwareLoading: 'Hardware wird geladen...',
     panelTitle: 'Tweak-Auswahl',
     panelLabel: 'TECH-PANEL',
@@ -194,7 +214,8 @@ function setLanguage(lang) {
   document.querySelector('#hero h1 .gradient-text').textContent = t.heroSubtitle;
   document.querySelector('#hero p').textContent = t.heroDesc;
   document.getElementById('applyTweaks').textContent = t.applyTweaks;
-  document.getElementById('refreshHardware').textContent = t.refreshHardware;
+  const restoreBtn = document.getElementById('restorePointBtn');
+  if (restoreBtn) restoreBtn.textContent = t.restorePoint;
   document.querySelector('#tweaks .section-header p').textContent = t.panelLabel;
   setGradientTitle(document.querySelector('#tweaks .section-header h2'), t.panelTitle);
   document.querySelector('#games .section-header p').textContent = t.gameLabel;
@@ -205,6 +226,14 @@ function setLanguage(lang) {
   if (hardwareInfo && !hardwareInfo.dataset.loaded) {
     hardwareInfo.textContent = t.hardwareLoading;
   }
+  const modalTitle = document.getElementById('restoreModalTitle');
+  const modalDesc = document.getElementById('restoreModalDesc');
+  const modalApply = document.getElementById('restoreApply');
+  const modalClose = document.getElementById('restoreClose');
+  if (modalTitle) modalTitle.textContent = t.restoreTitle;
+  if (modalDesc) modalDesc.textContent = t.restoreDesc;
+  if (modalApply) modalApply.textContent = t.restoreApply;
+  if (modalClose) modalClose.textContent = t.restoreClose;
   document.querySelectorAll('[data-i18n="footerDesc"]').forEach(el => el.textContent = t.footerDesc);
   document.querySelectorAll('[data-i18n="footerCredits"]').forEach(el => el.textContent = t.footerCredits);
   document.querySelectorAll('[data-i18n="footerResponsible"]').forEach(el => el.textContent = t.footerResponsible);
@@ -358,14 +387,14 @@ async function fetchGames() {
       <div class="tweak-meta">
         <span>${game.detectLabel}</span>
       </div>
-      <div style="display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap: wrap;">
+      <div class="game-actions">
         <select data-game="${game.key}">
           <option value="Low">${t.quality.low}</option>
           <option value="Medium">${t.quality.medium}</option>
           <option value="High">${t.quality.high}</option>
         </select>
         <button class="btn btn-primary apply-game" data-game="${game.key}">${t.quality.apply}</button>
-        <button class="btn apply-game-reset" data-game="${game.key}">${t.quality.revert}</button>
+        <button class="btn btn-secondary apply-game-reset" data-game="${game.key}">${t.quality.revert}</button>
       </div>
     `;
     gamesGrid.appendChild(card);
@@ -414,7 +443,52 @@ registerRevealElements();
 const applyBtn = document.getElementById('applyTweaks');
 applyBtn.addEventListener('click', applyTweaks);
 
-document.getElementById('refreshHardware').addEventListener('click', fetchHardware);
+document.getElementById('refreshHardware')?.addEventListener('click', fetchHardware);
+
+const restoreModal = document.getElementById('restoreModal');
+const restorePointBtn = document.getElementById('restorePointBtn');
+const restoreClose = document.getElementById('restoreClose');
+const restoreApply = document.getElementById('restoreApply');
+const restorePointName = document.getElementById('restorePointName');
+
+function openRestoreModal() {
+  if (!restoreModal) return;
+  restoreModal.classList.add('active');
+  restoreModal.setAttribute('aria-hidden', 'false');
+  if (restorePointName) {
+    restorePointName.value = '';
+    restorePointName.focus();
+  }
+}
+
+function closeRestoreModal() {
+  if (!restoreModal) return;
+  restoreModal.classList.remove('active');
+  restoreModal.setAttribute('aria-hidden', 'true');
+}
+
+restorePointBtn?.addEventListener('click', openRestoreModal);
+restoreClose?.addEventListener('click', closeRestoreModal);
+restoreModal?.addEventListener('click', (event) => {
+  if (event.target === restoreModal) {
+    closeRestoreModal();
+  }
+});
+
+restoreApply?.addEventListener('click', async () => {
+  const name = restorePointName?.value?.trim() || 'Lina Optimizer Restore Point';
+  const res = await fetch('/api/restorepoint', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name })
+  });
+  const result = await res.json();
+  if (systemLog) {
+    systemLog.dataset.locked = 'true';
+    systemLog.textContent = result.message || 'Restore point processado.';
+  }
+  closeRestoreModal();
+});
 
 let clickAudioContext;
 function playClickSound() {
