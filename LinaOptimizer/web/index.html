@@ -1,0 +1,550 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LinaOptimizer - Otimização de PC para alta performance.">
+  <title>LinaOptimizer | Performance Extrema</title>
+  <style>
+    :root {
+      --primary-neon: #00f3ff;
+      --secondary-neon: #bc13fe;
+      --bg-dark: #050505;
+      --bg-card: #0f1115;
+      --text-white: #ffffff;
+      --text-gray: #a0a0a0;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.05);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Montserrat', 'Rajdhani', 'Segoe UI', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image:
+        linear-gradient(rgba(5, 5, 5, 0.95), rgba(5, 5, 5, 0.95)),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+    }
+    #particleCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(var(--bg-dark), var(--primary-neon), var(--secondary-neon)); border-radius: 5px; }
+
+    h1, h2, h3, h4 {
+      font-family: 'Rajdhani', 'Montserrat', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    a { text-decoration: none; color: inherit; transition: var(--transition); }
+    ul { list-style: none; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    .gradient-text {
+      background: linear-gradient(90deg, var(--primary-neon), var(--secondary-neon));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 14px 35px; border-radius: 4px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem;
+      transition: var(--transition); cursor: pointer; border: 1px solid transparent;
+      position: relative; overflow: hidden; z-index: 1;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-primary {
+      background: transparent; color: var(--primary-neon); border: 1px solid var(--primary-neon);
+      box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+    }
+    .btn-primary::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: var(--primary-neon); transition: var(--transition); z-index: -1;
+    }
+    .btn-primary:hover { color: #000; box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); }
+    .btn-primary:hover::before { left: 0; }
+    .btn-discord {
+      background-color: #5865F2; color: white; border-radius: 50px;
+      padding: 10px 25px; font-size: 0.9rem; gap: 10px;
+    }
+    .btn-youtube {
+      background: transparent;
+      color: var(--secondary-neon);
+      border: 1px solid var(--secondary-neon);
+      box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
+    }
+    .btn-youtube::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--secondary-neon);
+      transition: var(--transition);
+      z-index: -1;
+    }
+    .btn-youtube:hover {
+      color: #000;
+      box-shadow: 0 0 20px rgba(188, 19, 254, 0.5);
+    }
+    .btn-youtube:hover::before { left: 0; }
+
+    header {
+      position: fixed; top: 0; left: 0; width: 100%; background: rgba(5, 5, 5, 0.95);
+      z-index: 1000; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: var(--transition);
+    }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.8rem; font-weight: 800; font-family: 'Rajdhani', sans-serif; color: white; }
+    .nav-links { display: flex; gap: 40px; align-items: center; }
+    .nav-links a { color: var(--text-gray); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; position: relative; }
+    .nav-links a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0%; height: 2px; background: var(--primary-neon); transition: var(--transition); }
+    .nav-links a:hover { color: white; }
+    .nav-links a:hover::after { width: 100%; }
+
+    #hero {
+      min-height: 100vh; display: flex; align-items: center; text-align: center; position: relative;
+      padding-top: 100px; overflow: hidden;
+    }
+    #hero::before {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 600px; height: 600px; background: radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, rgba(0,0,0,0) 70%);
+      z-index: -1; filter: blur(50px);
+    }
+    .hero-content { max-width: 900px; margin: 0 auto; z-index: 2; }
+    #tweaks, #games, footer { position: relative; z-index: 1; }
+    .hero-tag {
+      background: rgba(0, 243, 255, 0.1); border: 1px solid var(--primary-neon); color: var(--primary-neon);
+      padding: 5px 15px; font-size: 0.8rem; font-weight: 700; border-radius: 50px; text-transform: uppercase;
+      margin-bottom: 20px; display: inline-block;
+    }
+    .hero-content h1 { font-size: 4rem; margin-bottom: 20px; line-height: 1.1; }
+    .hero-content h1 span { display: block; font-size: 1.2rem; color: var(--text-gray); margin-bottom: 10px; font-weight: 400; letter-spacing: 3px; }
+    .hero-content p { font-size: 1.1rem; color: var(--text-gray); margin-bottom: 30px; }
+
+    #tweaks {
+      padding: 100px 0; background-color: #08080a;
+    }
+    .section-header { text-align: center; margin-bottom: 50px; }
+    .section-header h2 { font-size: 3rem; margin-bottom: 15px; }
+    .section-header p { color: var(--primary-neon); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; font-size: 0.9rem; }
+
+    .tweak-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+    .tweak-card {
+      background: rgba(15, 17, 21, 0.85); border: 1px solid var(--glass-border); padding: 24px; border-radius: 12px;
+      transition: var(--transition);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      justify-content: center;
+    }
+    .tweak-card:hover { border-color: var(--primary-neon); }
+    .tweak-card.selected {
+      box-shadow: 0 0 20px rgba(0,243,255,0.6), 0 0 40px rgba(188,19,254,0.4);
+    }
+    .tweak-card.applied {
+      border-color: rgba(255,255,255,0.1);
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .toggle-bar {
+      width: 10px;
+      align-self: stretch;
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(0,243,255,0.5), rgba(188,19,254,0.5));
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+    }
+    .tweak-card.selected .toggle-bar {
+      background: linear-gradient(180deg, #00f3ff, #bc13fe);
+      box-shadow: 0 0 14px rgba(0,243,255,0.8), 0 0 18px rgba(188,19,254,0.6);
+    }
+    .tweak-body { flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .tweak-title { font-size: 1.2rem; margin-bottom: 6px; }
+    .tweak-desc { color: var(--text-gray); font-size: 0.95rem; margin-bottom: 12px; opacity: 0; max-height: 0; transition: var(--transition); }
+    .tweak-card:hover .tweak-desc { opacity: 1; max-height: 200px; }
+    .tweak-meta { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--text-gray); margin-bottom: 12px; }
+    .applied-badge {
+      color: #6dff7a;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+    }
+    .tweak-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .tweak-actions .btn {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+    .risk-low { color: #6dff7a; }
+    .risk-medium { color: #ffe066; }
+    .risk-high { color: #ff6b6b; }
+
+    .log-panel {
+      margin-top: 30px; background: #0b0b0b; border: 1px solid var(--glass-border); border-radius: 12px; padding: 16px;
+      min-height: 120px; color: var(--text-gray); white-space: pre-wrap; font-size: 0.9rem;
+    }
+    .category-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0 90px;
+    }
+    .tweak-search {
+      flex: 1;
+      min-width: 220px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(11, 11, 11, 0.9);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--text-white);
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .tweak-search input {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      outline: none;
+      width: 100%;
+      font-size: 1rem;
+    }
+    .category-bar { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .category-btn {
+      padding: 10px 18px; border-radius: 30px; border: 1px solid var(--glass-border); color: var(--text-gray);
+      background: rgba(255,255,255,0.05); cursor: pointer; font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+      transition: var(--transition); letter-spacing: 1px;
+    }
+    .category-btn.active { color: #000; background: var(--primary-neon); border-color: var(--primary-neon); box-shadow: 0 0 15px rgba(0,243,255,0.6); }
+    .game-card select {
+      background: #0b0b0b; color: var(--text-white); border: 1px solid var(--glass-border); padding: 6px 10px; border-radius: 8px;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .game-card {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .game-card .game-info { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+    .game-card .tweak-title { font-size: 1.1rem; }
+    .game-card .tweak-desc { margin-bottom: 0; opacity: 1; max-height: none; }
+    .game-card .tweak-meta { margin-top: 0; }
+    .game-card .game-actions { display: flex; gap: 10px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+    .game-card .btn-primary { min-width: 120px; }
+    .game-card .btn-secondary {
+      background: #f5f5f5;
+      color: #0b0b0b;
+      border: 1px solid #f5f5f5;
+      box-shadow: none;
+    }
+    .game-card .btn-secondary:hover {
+      background: #ffffff;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 5, 5, 0.65);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      background: rgba(15, 17, 21, 0.92);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      width: min(420px, 90vw);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+    .modal-card h3 {
+      margin-bottom: 10px;
+    }
+    .modal-card p {
+      color: var(--text-gray);
+      margin-bottom: 16px;
+      white-space: pre-line;
+    }
+    .modal-card .modal-warn {
+      color: #ffcc66;
+      background: rgba(255, 204, 102, 0.08);
+      border: 1px solid rgba(255, 204, 102, 0.2);
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+    .modal-card .modal-status {
+      font-size: 0.85rem;
+      margin-top: -6px;
+      margin-bottom: 16px;
+      color: var(--text-gray);
+    }
+    .modal-card .modal-status[data-state="success"] { color: #6dff7a; }
+    .modal-card .modal-status[data-state="error"] { color: #ff6b6b; }
+    .modal-card input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: #0b0b0b;
+      color: var(--text-white);
+      font-family: 'Rajdhani', sans-serif;
+      margin-bottom: 16px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px) {
+      .nav-links { gap: 18px; flex-wrap: wrap; justify-content: center; }
+      .nav-container { flex-direction: column; gap: 12px; }
+      .tweak-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+      .category-row { gap: 12px; margin-bottom: 60px; }
+    }
+    @media (max-width: 600px) {
+      header { padding: 14px 0; }
+      .hero-content h1 { font-size: 2.6rem; }
+      .btn { width: 100%; }
+      .tweak-card { flex-direction: column; }
+      .toggle-bar { width: 100%; height: 6px; }
+      .category-row { flex-direction: column; align-items: stretch; }
+      .category-bar { justify-content: flex-start; }
+      .game-card .game-actions { flex-direction: column; }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px) scale(0.98);
+      filter: blur(6px);
+      transition: opacity 0.7s ease, transform 0.7s ease, filter 0.7s ease;
+      transition-delay: var(--reveal-delay, 0s);
+      will-change: opacity, transform, filter;
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+    .tweak-card.reveal::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(0, 243, 255, 0.15), rgba(0, 0, 0, 0));
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+    }
+    .tweak-card.reveal.is-visible::after {
+      opacity: 1;
+    }
+    .tweak-card.reveal.is-visible {
+      animation: card-pop 0.7s ease both;
+    }
+    @keyframes card-pop {
+      0% { transform: translateY(32px) scale(0.96); box-shadow: 0 0 0 rgba(0,0,0,0.2); }
+      60% { transform: translateY(-2px) scale(1.01); box-shadow: 0 18px 35px rgba(0,0,0,0.45); }
+      100% { transform: translateY(0) scale(1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; filter: none; }
+      .tweak-card.reveal.is-visible { animation: none; }
+    }
+
+    footer {
+      background-color: #020202; padding: 60px 0 30px; border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-content { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 40px; margin-bottom: 40px; }
+    .footer-links h4 { margin-bottom: 16px; color: white; font-size: 1.2rem; }
+    .footer-links ul li { margin-bottom: 10px; }
+    .footer-links ul li a { color: var(--text-gray); }
+    .copyright { text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; color: #666; }
+  </style>
+</head>
+<body>
+  <canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+  <header>
+    <div class="container nav-container">
+      <a href="#" class="logo">Lina<span class="gradient-text">Optimizer</span></a>
+      <nav>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#hero" data-i18n="navHome">Início</a></li>
+          <li><a href="#tweaks" data-i18n="navPanel">Painel</a></li>
+          <li><a href="#games" data-i18n="navGames">Jogos</a></li>
+          <li><a href="#contato" data-i18n="navSupport">Suporte</a></li>
+          <li>
+            <select id="langSelect" class="category-btn" style="padding:8px 14px;">
+              <option value="pt-BR">🇧🇷 Português</option>
+              <option value="en-US">🇺🇸 English</option>
+              <option value="es-ES">🇪🇸 Español</option>
+              <option value="de-DE">🇩🇪 Deutsch</option>
+            </select>
+          </li>
+        </ul>
+      </nav>
+      <div style="display: flex; gap: 20px; align-items: center;">
+        <button class="btn btn-secondary" id="licenseOpen">Licença</button>
+        <a href="https://www.youtube.com/@LinaSolutions" target="_blank" class="btn btn-youtube">YouTube</a>
+        <a href="https://discord.gg/CFw33ukueK" target="_blank" class="btn btn-discord" data-i18n="community">Comunidade</a>
+      </div>
+    </div>
+  </header>
+
+  <section id="hero">
+    <div class="container hero-content reveal">
+      <div class="hero-tag" data-i18n="heroTag">Localhost</div>
+      <h1>
+        <span>OTIMIZAÇÃO TOTAL</span>
+        <span class="gradient-text">WINDOWS & GAMES</span>
+      </h1>
+      <p>Controle todas as otimizações via painel local. Cada tweak com descrição, risco e aplicação segura.</p>
+      <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-primary" id="applyTweaks">Aplicar Tweaks</button>
+        <button class="btn" id="restorePointBtn" style="background: rgba(255,255,255,0.1); color: white;">Criar Ponto</button>
+      </div>
+      <div id="hardwareInfo" class="log-panel reveal" style="margin-top: 24px;" data-i18n="hardwareLoading">Carregando hardware...</div>
+    </div>
+  </section>
+
+  <section id="tweaks">
+    <div class="container">
+      <div class="section-header reveal">
+        <p>PAINEL TÉCNICO</p>
+        <h2>Seleção de <span class="gradient-text">Tweaks</span></h2>
+      </div>
+      <div class="category-row reveal">
+        <div class="tweak-search">
+          <span>🔍</span>
+          <input id="tweakSearch" type="text" placeholder="Buscar tweaks" />
+        </div>
+        <div class="category-bar" id="categoryBar"></div>
+      </div>
+      <div class="log-panel reveal" id="systemLog" data-i18n="systemLog">Logs aparecerão aqui.</div>
+      <div id="tweakGrid" class="reveal"></div>
+    </div>
+  </section>
+
+  <section id="games">
+    <div class="container">
+      <div class="section-header reveal">
+        <p>GAME CENTER</p>
+        <h2>Otimização de <span class="gradient-text">Jogos</span></h2>
+      </div>
+      <div id="gamesGrid" class="tweak-grid reveal"></div>
+    </div>
+  </section>
+
+  <section id="programs">
+    <div class="container">
+      <div class="section-header reveal">
+        <p>PROGRAMAS ESSENCIAIS</p>
+        <h2>Programas <span class="gradient-text">Essenciais</span></h2>
+      </div>
+      <div id="programsGrid" class="tweak-grid reveal"></div>
+    </div>
+  </section>
+
+  <div class="modal-overlay" id="licenseModal" aria-hidden="true">
+    <div class="modal-card">
+      <h3 id="licenseModalTitle">Ativar licença</h3>
+      <p id="licenseModalDesc">Digite sua chave para validar e liberar os recursos.</p>
+      <input id="licenseKeyInput" type="text" placeholder="Insira sua chave de licença" />
+      <p id="licenseStatus" class="modal-status"></p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="licenseActivate">Validar</button>
+        <button class="btn btn-secondary" id="licenseClose">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="programModal" aria-hidden="true">
+    <div class="modal-card">
+      <h3 id="programModalTitle">Programa</h3>
+      <p id="programModalDesc">Descrição</p>
+      <p id="programModalHow">Instruções</p>
+      <p id="programModalWarn" class="modal-warn" style="display:none;"></p>
+      <div class="modal-actions">
+        <a id="programDownload" class="btn btn-primary" href="#" target="_blank" rel="noopener">Download</a>
+        <button class="btn btn-secondary" id="programClose">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="restoreModal" aria-hidden="true">
+    <div class="modal-card">
+      <h3 id="restoreModalTitle">Criar ponto de restauração</h3>
+      <p id="restoreModalDesc">Digite um nome para o ponto de restauração.</p>
+      <input id="restorePointName" type="text" placeholder="Lina Optimizer Restore Point" />
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="restoreApply">Aplicar</button>
+        <button class="btn btn-secondary" id="restoreClose">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer id="contato">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3>Lina<span class="gradient-text">Optimizer</span></h3>
+          <p style="color: var(--text-gray); max-width: 300px;" data-i18n="footerDesc">Painel local para otimizações avançadas. Use com cautela.</p>
+        </div>
+        <div class="footer-links">
+          <h4 data-i18n="footerCredits">Créditos</h4>
+          <ul>
+            <li><a href="#">Lina Tweaks</a></li>
+            <li><a href="#" data-i18n="footerResponsible">Uso responsável</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright" data-i18n="footerCopyright">© 2024 LinaOptimizer. Créditos: Lina Tweaks.</div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
