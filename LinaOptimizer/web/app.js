@@ -397,10 +397,19 @@ async function fetchTweaks() {
 }
 
 async function fetchHardware() {
-  const res = await fetch('/api/hardware');
-  const data = await res.json();
-  hardwareInfo.dataset.loaded = 'true';
-  hardwareInfo.textContent = Object.entries(data).map(([k,v]) => `${k}: ${v}`).join('\n');
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch('/api/hardware', { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error('Hardware fetch failed');
+    const data = await res.json();
+    hardwareInfo.dataset.loaded = 'true';
+    hardwareInfo.textContent = Object.entries(data).map(([k,v]) => `${k}: ${v}`).join('\n');
+  } catch (error) {
+    hardwareInfo.dataset.loaded = 'true';
+    hardwareInfo.textContent = 'Hardware indisponível / Hardware unavailable';
+  }
 }
 
 async function applyTweaks() {

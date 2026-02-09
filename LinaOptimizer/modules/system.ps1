@@ -32,16 +32,26 @@ function Get-LinaSystemInfo {
     $os = Get-CimInstance Win32_OperatingSystem
     $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
     $gpu = Get-CimInstance Win32_VideoController | Select-Object -First 1
-    $disk = Get-CimInstance Win32_DiskDrive | Where-Object { $_.MediaType -match 'SSD' } | Select-Object -First 1
+    $disks = Get-CimInstance Win32_DiskDrive | Sort-Object Index
     $net = Get-CimInstance Win32_NetworkAdapter | Where-Object { $_.NetEnabled } | Select-Object -First 1
     $bios = Get-CimInstance Win32_BIOS | Select-Object -First 1
+    $storageList = @()
+    foreach ($d in $disks) {
+        $type = if ($d.MediaType -match 'SSD' -or $d.Model -match 'SSD') { 'SSD' } else { 'HDD' }
+        $sizeGb = if ($d.Size) { [Math]::Round($d.Size / 1GB, 0) } else { 0 }
+        $label = if ($sizeGb -gt 0) { "$type $sizeGb GB - $($d.Model)" } else { "$type - $($d.Model)" }
+        $storageList += $label
+    }
+    if ($storageList.Count -eq 0) {
+        $storageList = @('Não detectado / Not detected')
+    }
 
     [pscustomobject]@{
         Windows = "$($os.Caption) $($os.Version)"
         CPU = $cpu.Name
         GPU = $gpu.Name
         RAM = "{0:N0} GB" -f ($os.TotalVisibleMemorySize / 1MB)
-        SSD = if ($disk) { $disk.Model } else { 'Não detectado / Not detected' }
+        SSD = ($storageList -join ' | ')
         Network = if ($net) { $net.Name } else { 'Não detectado / Not detected' }
         Account = "$env:USERDOMAIN\$env:USERNAME"
         BIOS = "$($bios.Manufacturer) $($bios.SMBIOSBIOSVersion)"
