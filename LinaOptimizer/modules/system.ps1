@@ -1,4 +1,4 @@
-function Get-LinaDashboardSummary {
+﻿function Get-LinaDashboardSummary {
     $alerts = @()
     $score = 100
 

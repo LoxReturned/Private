@@ -1,24 +1,36 @@
 ﻿function Get-LinaNetworkTweaks {
     param([string]$Language = 'pt-BR')
     $items = @(
-        @{ Key = 'TCPNoDelay'; TitlePT = 'TCPNoDelay'; TitleEN = 'TCPNoDelay'; DescPT = 'Reduz latência TCP.'; DescEN = 'Reduce TCP latency.' },
-        @{ Key = 'TcpAckFrequency'; TitlePT = 'TcpAckFrequency'; TitleEN = 'TcpAckFrequency'; DescPT = 'Melhora resposta de ACK.'; DescEN = 'Improve ACK response.' },
-        @{ Key = 'NetworkThrottle'; TitlePT = 'Network Throttle Off'; TitleEN = 'Network Throttle Off'; DescPT = 'Desativa throttle de rede.'; DescEN = 'Disable network throttling.' },
-        @{ Key = 'QoSDisable'; TitlePT = 'QoS Disable'; TitleEN = 'QoS Disable'; DescPT = 'Remove QoS do sistema.'; DescEN = 'Disable QoS.' },
-        @{ Key = 'InterruptModeration'; TitlePT = 'Interrupt Moderation Off'; TitleEN = 'Interrupt Moderation Off'; DescPT = 'Reduz jitter na placa.'; DescEN = 'Reduce NIC jitter.' },
-        @{ Key = 'RSS'; TitlePT = 'RSS'; TitleEN = 'RSS'; DescPT = 'Ativa Receive Side Scaling.'; DescEN = 'Enable RSS.' },
-        @{ Key = 'RSC'; TitlePT = 'RSC'; TitleEN = 'RSC'; DescPT = 'Ativa Receive Segment Coalescing.'; DescEN = 'Enable RSC.' },
-        @{ Key = 'ECN'; TitlePT = 'ECN Off'; TitleEN = 'ECN Off'; DescPT = 'Desativa ECN.'; DescEN = 'Disable ECN.' },
-        @{ Key = 'Offload'; TitlePT = 'Offload Off'; TitleEN = 'Offload Off'; DescPT = 'Desativa offload TCP.'; DescEN = 'Disable TCP offload.' },
-        @{ Key = 'MTU1500'; TitlePT = 'MTU 1500'; TitleEN = 'MTU 1500'; DescPT = 'Define MTU padrão.'; DescEN = 'Set default MTU.' },
-        @{ Key = 'Buffers'; TitlePT = 'Buffers'; TitleEN = 'Buffers'; DescPT = 'Ajuste de buffers TCP.'; DescEN = 'Tune TCP buffers.' }
+        @{ Key = 'TCPNoDelay'; TitlePT = 'TCPNoDelay'; TitleEN = 'TCPNoDelay'; TitleES = 'TCPNoDelay'; TitleDE = 'TCPNoDelay'; DescPT = 'Reduz latência TCP.'; DescEN = 'Reduce TCP latency.'; DescES = 'Reduce la latencia TCP.'; DescDE = 'Reduziert TCP-Latenz.' },
+        @{ Key = 'TcpAckFrequency'; TitlePT = 'TcpAckFrequency'; TitleEN = 'TcpAckFrequency'; TitleES = 'TcpAckFrequency'; TitleDE = 'TcpAckFrequency'; DescPT = 'Melhora resposta de ACK.'; DescEN = 'Improve ACK response.'; DescES = 'Mejora la respuesta de ACK.'; DescDE = 'Verbessert die ACK-Antwort.' },
+        @{ Key = 'NetworkThrottle'; TitlePT = 'Network Throttle Off'; TitleEN = 'Network Throttle Off'; TitleES = 'Network Throttle Off'; TitleDE = 'Network Throttle Off'; DescPT = 'Desativa throttle de rede.'; DescEN = 'Disable network throttling.'; DescES = 'Desactiva el throttling de red.'; DescDE = 'Deaktiviert Netzwerk-Throttling.' },
+        @{ Key = 'QoSDisable'; TitlePT = 'QoS Disable'; TitleEN = 'QoS Disable'; TitleES = 'QoS Disable'; TitleDE = 'QoS Disable'; DescPT = 'Remove QoS do sistema.'; DescEN = 'Disable QoS.'; DescES = 'Desactiva QoS.'; DescDE = 'Deaktiviert QoS.' },
+        @{ Key = 'InterruptModeration'; TitlePT = 'Interrupt Moderation Off'; TitleEN = 'Interrupt Moderation Off'; TitleES = 'Interrupt Moderation Off'; TitleDE = 'Interrupt Moderation Off'; DescPT = 'Reduz jitter na placa.'; DescEN = 'Reduce NIC jitter.'; DescES = 'Reduce el jitter de la NIC.'; DescDE = 'Reduziert NIC-Jitter.' },
+        @{ Key = 'RSS'; TitlePT = 'RSS'; TitleEN = 'RSS'; TitleES = 'RSS'; TitleDE = 'RSS'; DescPT = 'Ativa Receive Side Scaling.'; DescEN = 'Enable RSS.'; DescES = 'Activa Receive Side Scaling.'; DescDE = 'Aktiviert Receive Side Scaling.' },
+        @{ Key = 'RSC'; TitlePT = 'RSC'; TitleEN = 'RSC'; TitleES = 'RSC'; TitleDE = 'RSC'; DescPT = 'Ativa Receive Segment Coalescing.'; DescEN = 'Enable RSC.'; DescES = 'Activa Receive Segment Coalescing.'; DescDE = 'Aktiviert Receive Segment Coalescing.' },
+        @{ Key = 'ECN'; TitlePT = 'ECN Off'; TitleEN = 'ECN Off'; TitleES = 'ECN Off'; TitleDE = 'ECN Off'; DescPT = 'Desativa ECN.'; DescEN = 'Disable ECN.'; DescES = 'Desactiva ECN.'; DescDE = 'Deaktiviert ECN.' },
+        @{ Key = 'Offload'; TitlePT = 'Offload Off'; TitleEN = 'Offload Off'; TitleES = 'Offload Off'; TitleDE = 'Offload Off'; DescPT = 'Desativa offload TCP.'; DescEN = 'Disable TCP offload.'; DescES = 'Desactiva el offload TCP.'; DescDE = 'Deaktiviert TCP-Offload.' },
+        @{ Key = 'MTU1500'; TitlePT = 'MTU 1500'; TitleEN = 'MTU 1500'; TitleES = 'MTU 1500'; TitleDE = 'MTU 1500'; DescPT = 'Define MTU padrão.'; DescEN = 'Set default MTU.'; DescES = 'Define el MTU predeterminado.'; DescDE = 'Setzt das Standard-MTU.' },
+        @{ Key = 'Buffers'; TitlePT = 'Buffers'; TitleEN = 'Buffers'; TitleES = 'Buffers'; TitleDE = 'Buffers'; DescPT = 'Ajuste de buffers TCP.'; DescEN = 'Tune TCP buffers.'; DescES = 'Ajusta los buffers TCP.'; DescDE = 'Stellt TCP-Buffer ein.' }
     )
 
     $items | ForEach-Object {
+        $title = switch ($Language) {
+            'pt-BR' { $_.TitlePT }
+            'es-ES' { $_.TitleES }
+            'de-DE' { $_.TitleDE }
+            default { $_.TitleEN }
+        }
+        $description = switch ($Language) {
+            'pt-BR' { $_.DescPT }
+            'es-ES' { $_.DescES }
+            'de-DE' { $_.DescDE }
+            default { $_.DescEN }
+        }
         [pscustomobject]@{
             Key = $_.Key
-            Title = if ($Language -eq 'pt-BR') { $_.TitlePT } else { $_.TitleEN }
-            Description = if ($Language -eq 'pt-BR') { $_.DescPT } else { $_.DescEN }
+            Title = $title
+            Description = $description
         }
     }
 }

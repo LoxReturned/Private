@@ -329,15 +329,40 @@
 
     .reveal {
       opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
+      transform: translateY(28px) scale(0.98);
+      filter: blur(6px);
+      transition: opacity 0.7s ease, transform 0.7s ease, filter 0.7s ease;
+      transition-delay: var(--reveal-delay, 0s);
+      will-change: opacity, transform, filter;
     }
     .reveal.is-visible {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+    .tweak-card.reveal::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(0, 243, 255, 0.15), rgba(0, 0, 0, 0));
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+    }
+    .tweak-card.reveal.is-visible::after {
+      opacity: 1;
+    }
+    .tweak-card.reveal.is-visible {
+      animation: card-pop 0.7s ease both;
+    }
+    @keyframes card-pop {
+      0% { transform: translateY(32px) scale(0.96); box-shadow: 0 0 0 rgba(0,0,0,0.2); }
+      60% { transform: translateY(-2px) scale(1.01); box-shadow: 0 18px 35px rgba(0,0,0,0.45); }
+      100% { transform: translateY(0) scale(1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
     }
     @media (prefers-reduced-motion: reduce) {
-      .reveal { opacity: 1; transform: none; transition: none; }
+      .reveal { opacity: 1; transform: none; transition: none; filter: none; }
+      .tweak-card.reveal.is-visible { animation: none; }
     }
 
     footer {

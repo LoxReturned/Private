@@ -1,4 +1,4 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 chcp 65001 | Out-Null
 [Console]::OutputEncoding = [Text.UTF8Encoding]::new()
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
@@ -59,20 +59,51 @@ function Send-File {
     $Response.OutputStream.Close()
 }
 
+function Get-LinaLocalizationLabels {
+    param([string]$Language = 'pt-BR')
+    switch ($Language) {
+        'pt-BR' {
+            return @{
+                Risks = @{ Low = 'Baixo'; Medium = 'Médio'; High = 'Alto' }
+                Categories = @{ Network = 'Rede'; Kernel = 'Kernel'; Debloat = 'Debloat' }
+            }
+        }
+        'es-ES' {
+            return @{
+                Risks = @{ Low = 'Bajo'; Medium = 'Medio'; High = 'Alto' }
+                Categories = @{ Network = 'Red'; Kernel = 'Kernel'; Debloat = 'Debloat' }
+            }
+        }
+        'de-DE' {
+            return @{
+                Risks = @{ Low = 'Niedrig'; Medium = 'Mittel'; High = 'Hoch' }
+                Categories = @{ Network = 'Netzwerk'; Kernel = 'Kernel'; Debloat = 'Debloat' }
+            }
+        }
+        default {
+            return @{
+                Risks = @{ Low = 'Low'; Medium = 'Medium'; High = 'High' }
+                Categories = @{ Network = 'Network'; Kernel = 'Kernel'; Debloat = 'Debloat' }
+            }
+        }
+    }
+}
+
 function Get-LinaTweaksPayload {
     param([string]$Language = 'pt-BR')
+    $labels = Get-LinaLocalizationLabels -Language $Language
     $system = Get-LinaSystemTweaks -Language $Language | ForEach-Object {
         $group = Get-LinaCategoryGroup -Category $_.Category -Key $_.Key
         [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = $_.Category; group = $group; risk = $_.Risk; type = 'system' }
     }
     $network = Get-LinaNetworkTweaks -Language $Language | ForEach-Object {
-        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Network'; group = 'internet'; risk = 'Médio'; type = 'network' }
+        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = $labels.Categories.Network; group = 'internet'; risk = $labels.Risks.Medium; type = 'network' }
     }
     $kernel = Get-LinaKernelTweaks -Language $Language | ForEach-Object {
-        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Kernel'; group = 'kernel'; risk = 'Alto'; type = 'kernel' }
+        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = $labels.Categories.Kernel; group = 'kernel'; risk = $labels.Risks.High; type = 'kernel' }
     }
     $debloat = Get-LinaDebloatModes -Language $Language | ForEach-Object {
-        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Debloat'; group = 'debloat'; risk = 'Alto'; type = 'debloat' }
+        [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = $labels.Categories.Debloat; group = 'debloat'; risk = $labels.Risks.High; type = 'debloat' }
     }
     $system + $network + $kernel + $debloat
 }
@@ -309,7 +340,9 @@ while ($listener.IsListening) {
                 Send-Json -Response $response -Object (Get-LinaTweaksPayload -Language $langValue)
             }
             '^/api/games$' {
-                $games = Get-LinaGameProfiles -Language 'pt-BR' | ForEach-Object {
+                $langParam = $request.QueryString['lang']
+                $langValue = if ([string]::IsNullOrWhiteSpace($langParam)) { 'pt-BR' } else { $langParam }
+                $games = Get-LinaGameProfiles -Language $langValue | ForEach-Object {
                     [pscustomobject]@{ key = $_.Key; name = $_.Name; description = $_.Description; detectLabel = $_.DetectLabel }
                 }
                 Send-Json -Response $response -Object $games

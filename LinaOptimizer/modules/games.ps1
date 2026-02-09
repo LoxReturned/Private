@@ -1,36 +1,65 @@
 ﻿function Get-LinaGameProfiles {
     param([string]$Language = 'pt-BR')
     $profiles = @(
-        @{ Key = 'FiveM'; NamePT = 'FiveM'; NameEN = 'FiveM'; DescPT = 'Cache, CitizenFX.ini, streaming e rede.'; DescEN = 'Cache, CitizenFX.ini, streaming and network.' },
-        @{ Key = 'GTAV'; NamePT = 'GTA V'; NameEN = 'GTA V'; DescPT = 'Ajustes de graphics e cache.'; DescEN = 'Graphics tweaks and cache.' },
-        @{ Key = 'Valorant'; NamePT = 'Valorant'; NameEN = 'Valorant'; DescPT = 'Config, prioridade e cache.'; DescEN = 'Config, priority and cache.' },
-        @{ Key = 'CS2'; NamePT = 'CS2'; NameEN = 'CS2'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.' },
-        @{ Key = 'CSGO'; NamePT = 'CS:GO'; NameEN = 'CS:GO'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.' },
-        @{ Key = 'LoL'; NamePT = 'League of Legends'; NameEN = 'League of Legends'; DescPT = 'Config low e cache.'; DescEN = 'Low config and cache.' },
-        @{ Key = 'Fortnite'; NamePT = 'Fortnite'; NameEN = 'Fortnite'; DescPT = 'Scalability e shader cache.'; DescEN = 'Scalability and shader cache.' },
-        @{ Key = 'Minecraft'; NamePT = 'Minecraft'; NameEN = 'Minecraft'; DescPT = 'Options, JVM flags e RAM.'; DescEN = 'Options, JVM flags and RAM.' },
-        @{ Key = 'Roblox'; NamePT = 'Roblox'; NameEN = 'Roblox'; DescPT = 'Registry, cache e FPS.'; DescEN = 'Registry, cache and FPS.' },
-        @{ Key = 'RocketLeague'; NamePT = 'Rocket League'; NameEN = 'Rocket League'; DescPT = 'TASettings, FPS unlock.'; DescEN = 'TASettings, FPS unlock.' },
-        @{ Key = 'Overwatch2'; NamePT = 'Overwatch 2'; NameEN = 'Overwatch 2'; DescPT = 'Config low e cache.'; DescEN = 'Low config and cache.' },
-        @{ Key = 'Apex'; NamePT = 'Apex Legends'; NameEN = 'Apex Legends'; DescPT = 'Config low e cache.'; DescEN = 'Low config and cache.' },
-        @{ Key = 'Warzone'; NamePT = 'Warzone'; NameEN = 'Warzone'; DescPT = 'Config, shaders e cache.'; DescEN = 'Config, shaders and cache.' },
-        @{ Key = 'TF2'; NamePT = 'Team Fortress 2'; NameEN = 'Team Fortress 2'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.' },
-        @{ Key = 'Dota2'; NamePT = 'Dota 2'; NameEN = 'Dota 2'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.' }
+        @{ Key = 'FiveM'; NamePT = 'FiveM'; NameEN = 'FiveM'; NameES = 'FiveM'; NameDE = 'FiveM'; DescPT = 'Cache, CitizenFX.ini, streaming e rede.'; DescEN = 'Cache, CitizenFX.ini, streaming and network.'; DescES = 'Caché, CitizenFX.ini, streaming y red.'; DescDE = 'Cache, CitizenFX.ini, Streaming und Netzwerk.' },
+        @{ Key = 'GTAV'; NamePT = 'GTA V'; NameEN = 'GTA V'; NameES = 'GTA V'; NameDE = 'GTA V'; DescPT = 'Ajustes de graphics e cache.'; DescEN = 'Graphics tweaks and cache.'; DescES = 'Ajustes de gráficos y caché.'; DescDE = 'Grafik-Tweaks und Cache.' },
+        @{ Key = 'Valorant'; NamePT = 'Valorant'; NameEN = 'Valorant'; NameES = 'Valorant'; NameDE = 'Valorant'; DescPT = 'Config, prioridade e cache.'; DescEN = 'Config, priority and cache.'; DescES = 'Configuración, prioridad y caché.'; DescDE = 'Konfiguration, Priorität und Cache.' },
+        @{ Key = 'CS2'; NamePT = 'CS2'; NameEN = 'CS2'; NameES = 'CS2'; NameDE = 'CS2'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.'; DescES = 'Autoexec y argumentos de inicio.'; DescDE = 'Autoexec und Startargumente.' },
+        @{ Key = 'CSGO'; NamePT = 'CS:GO'; NameEN = 'CS:GO'; NameES = 'CS:GO'; NameDE = 'CS:GO'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.'; DescES = 'Autoexec y argumentos de inicio.'; DescDE = 'Autoexec und Startargumente.' },
+        @{ Key = 'LoL'; NamePT = 'League of Legends'; NameEN = 'League of Legends'; NameES = 'League of Legends'; NameDE = 'League of Legends'; DescPT = 'Config low e cache.'; DescEN = 'Low config and cache.'; DescES = 'Configuración baja y caché.'; DescDE = 'Niedrige Einstellungen und Cache.' },
+        @{ Key = 'Fortnite'; NamePT = 'Fortnite'; NameEN = 'Fortnite'; NameES = 'Fortnite'; NameDE = 'Fortnite'; DescPT = 'Scalability e shader cache.'; DescEN = 'Scalability and shader cache.'; DescES = 'Escalabilidad y caché de shaders.'; DescDE = 'Skalierung und Shader-Cache.' },
+        @{ Key = 'Minecraft'; NamePT = 'Minecraft'; NameEN = 'Minecraft'; NameES = 'Minecraft'; NameDE = 'Minecraft'; DescPT = 'Options, JVM flags e RAM.'; DescEN = 'Options, JVM flags and RAM.'; DescES = 'Opciones, flags JVM y RAM.'; DescDE = 'Optionen, JVM-Flags und RAM.' },
+        @{ Key = 'Roblox'; NamePT = 'Roblox'; NameEN = 'Roblox'; NameES = 'Roblox'; NameDE = 'Roblox'; DescPT = 'Registry, cache e FPS.'; DescEN = 'Registry, cache and FPS.'; DescES = 'Registro, caché y FPS.'; DescDE = 'Registry, Cache und FPS.' },
+        @{ Key = 'RocketLeague'; NamePT = 'Rocket League'; NameEN = 'Rocket League'; NameES = 'Rocket League'; NameDE = 'Rocket League'; DescPT = 'TASettings, FPS unlock.'; DescEN = 'TASettings, FPS unlock.'; DescES = 'TASettings y desbloqueo de FPS.'; DescDE = 'TASettings und FPS-Unlock.' },
+        @{ Key = 'Overwatch2'; NamePT = 'Overwatch 2'; NameEN = 'Overwatch 2'; NameES = 'Overwatch 2'; NameDE = 'Overwatch 2'; DescPT = 'Config low e cache.'; DescEN = 'Low config and cache.'; DescES = 'Configuración baja y caché.'; DescDE = 'Niedrige Einstellungen und Cache.' },
+        @{ Key = 'Apex'; NamePT = 'Apex Legends'; NameEN = 'Apex Legends'; NameES = 'Apex Legends'; NameDE = 'Apex Legends'; DescPT = 'Config low e cache.'; DescEN = 'Low config and cache.'; DescES = 'Configuración baja y caché.'; DescDE = 'Niedrige Einstellungen und Cache.' },
+        @{ Key = 'Warzone'; NamePT = 'Warzone'; NameEN = 'Warzone'; NameES = 'Warzone'; NameDE = 'Warzone'; DescPT = 'Config, shaders e cache.'; DescEN = 'Config, shaders and cache.'; DescES = 'Configuración, shaders y caché.'; DescDE = 'Konfiguration, Shader und Cache.' },
+        @{ Key = 'TF2'; NamePT = 'Team Fortress 2'; NameEN = 'Team Fortress 2'; NameES = 'Team Fortress 2'; NameDE = 'Team Fortress 2'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.'; DescES = 'Autoexec y argumentos de inicio.'; DescDE = 'Autoexec und Startargumente.' },
+        @{ Key = 'Dota2'; NamePT = 'Dota 2'; NameEN = 'Dota 2'; NameES = 'Dota 2'; NameDE = 'Dota 2'; DescPT = 'Autoexec e launch args.'; DescEN = 'Autoexec and launch args.'; DescES = 'Autoexec y argumentos de inicio.'; DescDE = 'Autoexec und Startargumente.' }
     )
 
     foreach ($p in $profiles) {
         $installed = Test-LinaGameInstalled -GameKey $p.Key
-        $p.DetectLabel = if ($installed) { 'Detectado / Detected' } else { 'Não detectado / Not detected' }
+        $p.DetectLabel = Get-LinaGameDetectLabel -Installed $installed -Language $Language
     }
 
     $profiles | ForEach-Object {
+        $name = switch ($Language) {
+            'pt-BR' { $_.NamePT }
+            'es-ES' { $_.NameES }
+            'de-DE' { $_.NameDE }
+            default { $_.NameEN }
+        }
+        $description = switch ($Language) {
+            'pt-BR' { $_.DescPT }
+            'es-ES' { $_.DescES }
+            'de-DE' { $_.DescDE }
+            default { $_.DescEN }
+        }
         [pscustomobject]@{
             Key = $_.Key
-            Name = if ($Language -eq 'pt-BR') { $_.NamePT } else { $_.NameEN }
-            Description = if ($Language -eq 'pt-BR') { $_.DescPT } else { $_.DescEN }
+            Name = $name
+            Description = $description
             DetectLabel = $_.DetectLabel
         }
     }
+}
+
+function Get-LinaGameDetectLabel {
+    param(
+        [Parameter(Mandatory)] [bool]$Installed,
+        [Parameter()] [string]$Language = 'pt-BR'
+    )
+    $labels = switch ($Language) {
+        'pt-BR' { @{ Found = 'Detectado'; Missing = 'Não detectado' } }
+        'es-ES' { @{ Found = 'Detectado'; Missing = 'No detectado' } }
+        'de-DE' { @{ Found = 'Erkannt'; Missing = 'Nicht erkannt' } }
+        default { @{ Found = 'Detected'; Missing = 'Not detected' } }
+    }
+    if ($Installed) {
+        return $labels.Found
+    }
+    return $labels.Missing
 }
 
 function Get-LinaSteamLibraries {

@@ -1,16 +1,28 @@
 ﻿function Get-LinaDebloatModes {
     param([string]$Language = 'pt-BR')
     $modes = @(
-        @{ Key = 'Light'; TitlePT = 'Leve'; TitleEN = 'Light'; DescPT = 'Remoção segura de apps básicos.'; DescEN = 'Safe removal of basic apps.' },
-        @{ Key = 'Medium'; TitlePT = 'Médio'; TitleEN = 'Medium'; DescPT = 'Balanceado para performance.'; DescEN = 'Balanced for performance.' },
-        @{ Key = 'Extreme'; TitlePT = 'Nuclear'; TitleEN = 'Extreme'; DescPT = 'Remoção agressiva, use com cautela.'; DescEN = 'Aggressive removal, use with caution.' }
+        @{ Key = 'Light'; TitlePT = 'Leve'; TitleEN = 'Light'; TitleES = 'Ligero'; TitleDE = 'Leicht'; DescPT = 'Remoção segura de apps básicos.'; DescEN = 'Safe removal of basic apps.'; DescES = 'Eliminación segura de apps básicas.'; DescDE = 'Sichere Entfernung grundlegender Apps.' },
+        @{ Key = 'Medium'; TitlePT = 'Médio'; TitleEN = 'Medium'; TitleES = 'Medio'; TitleDE = 'Mittel'; DescPT = 'Balanceado para performance.'; DescEN = 'Balanced for performance.'; DescES = 'Balanceado para rendimiento.'; DescDE = 'Ausgewogen für Performance.' },
+        @{ Key = 'Extreme'; TitlePT = 'Nuclear'; TitleEN = 'Extreme'; TitleES = 'Extremo'; TitleDE = 'Extrem'; DescPT = 'Remoção agressiva, use com cautela.'; DescEN = 'Aggressive removal, use with caution.'; DescES = 'Eliminación agresiva, úsalo con cuidado.'; DescDE = 'Aggressive Entfernung, mit Vorsicht nutzen.' }
     )
 
     $modes | ForEach-Object {
+        $title = switch ($Language) {
+            'pt-BR' { "$($_.TitlePT) / $($_.TitleEN)" }
+            'es-ES' { "$($_.TitleES) / $($_.TitleEN)" }
+            'de-DE' { "$($_.TitleDE) / $($_.TitleEN)" }
+            default { "$($_.TitleEN) / $($_.TitlePT)" }
+        }
+        $description = switch ($Language) {
+            'pt-BR' { $_.DescPT }
+            'es-ES' { $_.DescES }
+            'de-DE' { $_.DescDE }
+            default { $_.DescEN }
+        }
         [pscustomobject]@{
             Key = $_.Key
-            Title = if ($Language -eq 'pt-BR') { "$($_.TitlePT) / $($_.TitleEN)" } else { "$($_.TitleEN) / $($_.TitlePT)" }
-            Description = if ($Language -eq 'pt-BR') { $_.DescPT } else { $_.DescEN }
+            Title = $title
+            Description = $description
         }
     }
 }
