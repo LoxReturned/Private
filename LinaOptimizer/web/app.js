@@ -14,16 +14,7 @@ const programModalHow = document.getElementById('programModalHow');
 const programModalWarn = document.getElementById('programModalWarn');
 const programDownload = document.getElementById('programDownload');
 const programClose = document.getElementById('programClose');
-const licenseModal = document.getElementById('licenseModal');
-const licenseModalTitle = document.getElementById('licenseModalTitle');
-const licenseModalDesc = document.getElementById('licenseModalDesc');
-const licenseKeyInput = document.getElementById('licenseKeyInput');
-const licenseStatus = document.getElementById('licenseStatus');
-const licenseActivate = document.getElementById('licenseActivate');
-const licenseClose = document.getElementById('licenseClose');
-const licenseOpen = document.getElementById('licenseOpen');
 let applyBtn;
-let licenseIsValid = localStorage.getItem('linaLicenseValid') === 'true';
 
 const translations = {
   'pt-BR': {
@@ -74,18 +65,6 @@ const translations = {
       close: 'Fechar',
       how: 'Como usar',
       search: 'Buscar tweaks'
-    },
-    license: {
-      button: 'Licença',
-      title: 'Ativar licença',
-      desc: 'Digite sua chave para validar e liberar os recursos.',
-      placeholder: 'Insira sua chave de licença',
-      activate: 'Validar',
-      close: 'Fechar',
-      checking: 'Validando chave...',
-      success: 'Licença validada com sucesso.',
-      invalid: 'Chave inválida ou expirada.',
-      error: 'Falha ao validar a licença.'
     }
   },
   'en-US': {
@@ -136,18 +115,6 @@ const translations = {
       close: 'Close',
       how: 'How to use',
       search: 'Search tweaks'
-    },
-    license: {
-      button: 'License',
-      title: 'Activate license',
-      desc: 'Enter your key to validate and unlock the features.',
-      placeholder: 'Enter your license key',
-      activate: 'Validate',
-      close: 'Close',
-      checking: 'Validating key...',
-      success: 'License validated successfully.',
-      invalid: 'Invalid or expired key.',
-      error: 'Failed to validate the license.'
     }
   },
   'es-ES': {
@@ -198,18 +165,6 @@ const translations = {
       close: 'Cerrar',
       how: 'Cómo usar',
       search: 'Buscar tweaks'
-    },
-    license: {
-      button: 'Licencia',
-      title: 'Activar licencia',
-      desc: 'Introduce tu clave para validar y desbloquear los recursos.',
-      placeholder: 'Ingresa tu clave de licencia',
-      activate: 'Validar',
-      close: 'Cerrar',
-      checking: 'Validando clave...',
-      success: 'Licencia validada correctamente.',
-      invalid: 'Clave inválida o expirada.',
-      error: 'No se pudo validar la licencia.'
     }
   },
   'de-DE': {
@@ -260,18 +215,6 @@ const translations = {
       close: 'Schließen',
       how: 'Anleitung',
       search: 'Tweaks suchen'
-    },
-    license: {
-      button: 'Lizenz',
-      title: 'Lizenz aktivieren',
-      desc: 'Geben Sie Ihren Schlüssel ein, um Funktionen freizuschalten.',
-      placeholder: 'Lizenzschlüssel eingeben',
-      activate: 'Validieren',
-      close: 'Schließen',
-      checking: 'Schlüssel wird geprüft...',
-      success: 'Lizenz erfolgreich validiert.',
-      invalid: 'Ungültiger oder abgelaufener Schlüssel.',
-      error: 'Lizenz konnte nicht validiert werden.'
     }
   }
 };
@@ -352,20 +295,6 @@ function setLanguage(lang) {
   if (programDownload) programDownload.textContent = t.programs.download;
   if (programClose) programClose.textContent = t.programs.close;
   if (tweakSearch) tweakSearch.placeholder = t.programs.search;
-  if (licenseOpen) licenseOpen.textContent = t.license.button;
-  if (licenseModalTitle) licenseModalTitle.textContent = t.license.title;
-  if (licenseModalDesc) licenseModalDesc.textContent = t.license.desc;
-  if (licenseKeyInput) licenseKeyInput.placeholder = t.license.placeholder;
-  if (licenseActivate) licenseActivate.textContent = t.license.activate;
-  if (licenseClose) licenseClose.textContent = t.license.close;
-}
-
-function setLicenseState(valid) {
-  licenseIsValid = valid;
-  if (applyBtn) applyBtn.disabled = !valid;
-  document.querySelectorAll('.apply-game, .apply-game-reset, .tweak-revert').forEach(btn => {
-    btn.disabled = !valid;
-  });
 }
 
 function riskClass(risk) {
@@ -494,7 +423,6 @@ async function fetchTweaks() {
     const active = categoryBar.querySelector('.category-btn.active');
     renderCards(active ? active.dataset.filter : 'all');
   });
-  setLicenseState(licenseIsValid);
 }
 
 async function fetchHardware() {
@@ -513,10 +441,6 @@ async function fetchHardware() {
 }
 
 async function applyTweaks() {
-  if (!licenseIsValid) {
-    openLicenseModal();
-    return;
-  }
   const payload = Array.from(selectedTweaks).map(key => {
     const card = document.querySelector(`.tweak-card[data-key="${key}"]`);
     if (!card || card.classList.contains('applied')) {
@@ -542,10 +466,6 @@ async function applyTweaks() {
 
 async function revertTweak(key, type) {
   if (!key || !type) return;
-  if (!licenseIsValid) {
-    openLicenseModal();
-    return;
-  }
   const res = await fetch('/api/revert', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -594,10 +514,6 @@ async function fetchGames() {
 
   document.querySelectorAll('.apply-game').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!licenseIsValid) {
-        openLicenseModal();
-        return;
-      }
       const gameKey = btn.dataset.game;
       const select = document.querySelector(`select[data-game="${gameKey}"]`);
       const quality = select ? select.value : 'Low';
@@ -611,10 +527,6 @@ async function fetchGames() {
 
   document.querySelectorAll('.apply-game-reset').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!licenseIsValid) {
-        openLicenseModal();
-        return;
-      }
       const gameKey = btn.dataset.game;
       await fetch('/api/games/reset', {
         method: 'POST',
@@ -623,7 +535,6 @@ async function fetchGames() {
       });
     });
   });
-  setLicenseState(licenseIsValid);
 }
 
 const programs = [
@@ -1146,7 +1057,6 @@ registerRevealElements();
 
 applyBtn = document.getElementById('applyTweaks');
 applyBtn.addEventListener('click', applyTweaks);
-setLicenseState(licenseIsValid);
 
 document.getElementById('refreshHardware')?.addEventListener('click', fetchHardware);
 
@@ -1222,74 +1132,6 @@ function closeProgramModal() {
   programModal.setAttribute('aria-hidden', 'true');
 }
 
-const licenseStorageKey = 'linaLicenseKey';
-const licenseValidKey = 'linaLicenseValid';
-
-function openLicenseModal() {
-  if (!licenseModal) return;
-  licenseModal.classList.add('active');
-  licenseModal.setAttribute('aria-hidden', 'false');
-  if (licenseKeyInput) {
-    const saved = localStorage.getItem(licenseStorageKey) || '';
-    licenseKeyInput.value = saved;
-    licenseKeyInput.focus();
-  }
-}
-
-function closeLicenseModal() {
-  if (!licenseModal) return;
-  licenseModal.classList.remove('active');
-  licenseModal.setAttribute('aria-hidden', 'true');
-}
-
-function setLicenseStatus(message, state = 'info') {
-  if (!licenseStatus) return;
-  licenseStatus.textContent = message;
-  licenseStatus.dataset.state = state;
-}
-
-async function validateLicenseKey(key, options = {}) {
-  const lang = langSelect ? langSelect.value : 'pt-BR';
-  const t = translations[lang] || translations['pt-BR'];
-  if (!key) {
-    setLicenseStatus(t.license.invalid, 'error');
-    return;
-  }
-  if (licenseActivate) {
-    licenseActivate.disabled = true;
-  }
-  setLicenseStatus(t.license.checking, 'info');
-  try {
-    const res = await fetch('/api/license/validate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key })
-    });
-    const result = await res.json();
-    if (result.valid) {
-      localStorage.setItem(licenseStorageKey, key);
-      localStorage.setItem(licenseValidKey, 'true');
-      setLicenseStatus(t.license.success, 'success');
-      setLicenseState(true);
-      if (!options.keepOpen) {
-        setTimeout(() => closeLicenseModal(), 800);
-      }
-    } else {
-      localStorage.removeItem(licenseValidKey);
-      setLicenseStatus(result.message || t.license.invalid, 'error');
-      setLicenseState(false);
-    }
-  } catch (error) {
-    localStorage.removeItem(licenseValidKey);
-    setLicenseStatus(t.license.error, 'error');
-    setLicenseState(false);
-  } finally {
-    if (licenseActivate) {
-      licenseActivate.disabled = false;
-    }
-  }
-}
-
 programClose?.addEventListener('click', closeProgramModal);
 programModal?.addEventListener('click', (event) => {
   if (event.target === programModal) closeProgramModal();
@@ -1304,23 +1146,6 @@ document.addEventListener('click', (event) => {
   const program = programs.find(item => item.id === id);
   if (program) openProgramModal(program);
 });
-
-licenseOpen?.addEventListener('click', openLicenseModal);
-licenseClose?.addEventListener('click', closeLicenseModal);
-licenseModal?.addEventListener('click', (event) => {
-  if (event.target === licenseModal) closeLicenseModal();
-});
-licenseActivate?.addEventListener('click', () => {
-  const key = licenseKeyInput?.value?.trim() || '';
-  validateLicenseKey(key, { keepOpen: true });
-});
-
-const savedLicenseKey = localStorage.getItem(licenseStorageKey);
-if (savedLicenseKey) {
-  validateLicenseKey(savedLicenseKey, { keepOpen: true });
-} else {
-  openLicenseModal();
-}
 
 let clickAudioContext;
 function playClickSound() {

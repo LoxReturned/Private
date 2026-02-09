@@ -314,14 +314,6 @@
       padding: 10px 12px;
       border-radius: 10px;
     }
-    .modal-card .modal-status {
-      font-size: 0.85rem;
-      margin-top: -6px;
-      margin-bottom: 16px;
-      color: var(--text-gray);
-    }
-    .modal-card .modal-status[data-state="success"] { color: #6dff7a; }
-    .modal-card .modal-status[data-state="error"] { color: #ff6b6b; }
     .modal-card input {
       width: 100%;
       padding: 10px 12px;
@@ -427,7 +419,6 @@
         </ul>
       </nav>
       <div style="display: flex; gap: 20px; align-items: center;">
-        <button class="btn btn-secondary" id="licenseOpen">Licença</button>
         <a href="https://www.youtube.com/@LinaSolutions" target="_blank" class="btn btn-youtube">YouTube</a>
         <a href="https://discord.gg/CFw33ukueK" target="_blank" class="btn btn-discord" data-i18n="community">Comunidade</a>
       </div>
@@ -487,19 +478,6 @@
       <div id="programsGrid" class="tweak-grid reveal"></div>
     </div>
   </section>
-
-  <div class="modal-overlay" id="licenseModal" aria-hidden="true">
-    <div class="modal-card">
-      <h3 id="licenseModalTitle">Ativar licença</h3>
-      <p id="licenseModalDesc">Digite sua chave para validar e liberar os recursos.</p>
-      <input id="licenseKeyInput" type="text" placeholder="Insira sua chave de licença" />
-      <p id="licenseStatus" class="modal-status"></p>
-      <div class="modal-actions">
-        <button class="btn btn-primary" id="licenseActivate">Validar</button>
-        <button class="btn btn-secondary" id="licenseClose">Fechar</button>
-      </div>
-    </div>
-  </div>
 
   <div class="modal-overlay" id="programModal" aria-hidden="true">
     <div class="modal-card">

@@ -30,4 +30,5 @@
   $env:LINA_PORT = 8787
   ./dist/LinaOptimizerServer.exe
   ```
+- O servidor exige licença válida. Ao iniciar, ele redireciona para `/license` e só libera o painel após validação.
 - Para distribuição mais avançada (instalador), use ferramentas como Inno Setup ou NSIS apontando para a pasta `dist/`.

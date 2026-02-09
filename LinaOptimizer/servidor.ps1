@@ -22,6 +22,7 @@ if (-not (Test-Path $script:LogRoot)) {
 $script:ServerLog = New-Object System.Collections.Concurrent.ConcurrentQueue[string]
 $script:ServerPort = $null
 $script:ServerPrefix = $null
+$script:LicenseValid = $false
 
 function Add-ServerLog {
     param([string]$Message)
@@ -368,14 +369,32 @@ while ($listener.IsListening) {
     $context = $listener.GetContext()
     $request = $context.Request
     $response = $context.Response
+    $path = $request.Url.AbsolutePath
+    $isLicenseRoute = $path -match '^/license$' -or $path -match '^/license\\.html$' -or $path -match '^/license\\.js$'
+    $isLicenseApi = $path -match '^/api/license/validate$'
 
     try {
+        if (-not $script:LicenseValid -and -not ($isLicenseRoute -or $isLicenseApi)) {
+            $response.StatusCode = 302
+            $response.RedirectLocation = '/license'
+            $response.OutputStream.Close()
+            continue
+        }
         switch -Regex ($request.Url.AbsolutePath) {
             '^/$' {
                 Send-File -Response $response -Path (Join-Path $script:WebRoot 'index.html') -ContentType 'text/html; charset=utf-8'
             }
             '^/app.js$' {
                 Send-File -Response $response -Path (Join-Path $script:WebRoot 'app.js') -ContentType 'application/javascript; charset=utf-8'
+            }
+            '^/license$' {
+                Send-File -Response $response -Path (Join-Path $script:WebRoot 'license.html') -ContentType 'text/html; charset=utf-8'
+            }
+            '^/license.html$' {
+                Send-File -Response $response -Path (Join-Path $script:WebRoot 'license.html') -ContentType 'text/html; charset=utf-8'
+            }
+            '^/license.js$' {
+                Send-File -Response $response -Path (Join-Path $script:WebRoot 'license.js') -ContentType 'application/javascript; charset=utf-8'
             }
             '^/api/hardware$' {
                 try {
@@ -442,7 +461,15 @@ while ($listener.IsListening) {
                 $body.Close()
                 $key = if ($data -and $data.key) { $data.key } else { '' }
                 $result = Test-LinaLicenseKey -Key $key
+                $script:LicenseValid = [bool]$result.valid
                 Send-Json -Response $response -Object $result
+                if (-not $script:LicenseValid) {
+                    Add-ServerLog 'Licença inválida. Encerrando servidor.'
+                    $listener.Stop()
+                    $listener.Close()
+                } else {
+                    Add-ServerLog 'Licença validada. Acesso liberado.'
+                }
             }
             '^/api/apply$' {
                 $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)

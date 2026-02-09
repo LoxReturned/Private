@@ -33,13 +33,13 @@ Import-Module ps2exe
 if ($BuildServer -or -not ($BuildServer -or $BuildDesktop)) {
     $serverSource = Join-Path $dist 'servidor.ps1'
     $serverOut = Join-Path $dist 'LinaOptimizerServer.exe'
-    Invoke-PS2EXE -InputFile $serverSource -OutputFile $serverOut -NoConsole -Force
+    Invoke-PS2EXE -InputFile $serverSource -OutputFile $serverOut -NoConsole
 }
 
 if ($BuildDesktop) {
     $desktopSource = Join-Path $dist 'main.ps1'
     $desktopOut = Join-Path $dist 'LinaOptimizerDesktop.exe'
-    Invoke-PS2EXE -InputFile $desktopSource -OutputFile $desktopOut -NoConsole -Force
+    Invoke-PS2EXE -InputFile $desktopSource -OutputFile $desktopOut -NoConsole
 }
 
 Write-Host "Build concluído em $dist"
