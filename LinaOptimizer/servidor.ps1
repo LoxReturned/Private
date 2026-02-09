@@ -7,6 +7,8 @@ $script:AppRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $env:LINA_APPROOT = $script:AppRoot
 $script:WebRoot = Join-Path $script:AppRoot 'web'
 $script:LogRoot = Join-Path $script:AppRoot 'logs'
+$script:AppliedFile = Join-Path $script:LogRoot 'applied-tweaks.json'
+$script:LicenseFile = Join-Path $script:LogRoot 'license.json'
 if (-not (Test-Path $script:LogRoot)) {
     New-Item -Path $script:LogRoot -ItemType Directory | Out-Null
 }
@@ -57,6 +59,112 @@ function Send-File {
     $Response.ContentLength64 = $bytes.Length
     $Response.OutputStream.Write($bytes, 0, $bytes.Length)
     $Response.OutputStream.Close()
+}
+
+function Get-LinaRandomPort {
+    param([int]$Min = 8700, [int]$Max = 8799)
+    for ($i = 0; $i -lt 40; $i++) {
+        $candidate = Get-Random -Minimum $Min -Maximum $Max
+        try {
+            $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $candidate)
+            $listener.Start()
+            $listener.Stop()
+            return $candidate
+        } catch {
+            continue
+        }
+    }
+    return 8787
+}
+
+function Get-LinaAppliedTweaks {
+    if (-not (Test-Path $script:AppliedFile)) {
+        return @()
+    }
+    try {
+        $data = Get-Content $script:AppliedFile -Raw | ConvertFrom-Json
+        if ($data -is [System.Array]) {
+            return $data
+        }
+    } catch {
+        return @()
+    }
+    return @()
+}
+
+function Set-LinaAppliedTweaks {
+    param([string[]]$Keys)
+    $payload = $Keys | Sort-Object -Unique
+    $payload | ConvertTo-Json | Set-Content -Path $script:AppliedFile -Encoding utf8
+}
+
+function Add-LinaAppliedTweaks {
+    param([string[]]$Keys)
+    $current = Get-LinaAppliedTweaks
+    $next = @($current + $Keys) | Sort-Object -Unique
+    Set-LinaAppliedTweaks -Keys $next
+}
+
+function Remove-LinaAppliedTweaks {
+    param([string[]]$Keys)
+    $current = Get-LinaAppliedTweaks
+    $next = $current | Where-Object { $Keys -notcontains $_ }
+    Set-LinaAppliedTweaks -Keys $next
+}
+
+function Get-LinaLicenseStatus {
+    if (-not (Test-Path $script:LicenseFile)) {
+        return $null
+    }
+    try {
+        return Get-Content $script:LicenseFile -Raw | ConvertFrom-Json
+    } catch {
+        return $null
+    }
+}
+
+function Save-LinaLicenseStatus {
+    param([string]$Key, [bool]$Valid, [string]$Message)
+    $masked = if ($Key -and $Key.Length -ge 4) { $Key.Substring($Key.Length - 4) } else { '' }
+    $payload = [pscustomobject]@{
+        valid = $Valid
+        last4 = $masked
+        message = $Message
+        updatedAt = (Get-Date).ToString('o')
+    }
+    $payload | ConvertTo-Json | Set-Content -Path $script:LicenseFile -Encoding utf8
+}
+
+function Invoke-LinaLicenseValidation {
+    param([string]$Key)
+    $headers = @{
+        'Content-Type' = 'application/vnd.api+json'
+        'Accept' = 'application/vnd.api+json'
+    }
+    $body = @{
+        meta = @{
+            key = $Key
+            scope = @{
+                product = 'e05ccb07-37c9-4ef7-ba4c-fd60de1937f5'
+                policy = '054fbf1b-a35d-4f0b-8689-9fdbe4237b5b'
+            }
+        }
+    } | ConvertTo-Json -Depth 5
+    try {
+        $response = Invoke-RestMethod -Method Post -Uri 'https://api.keygen.sh/v1/accounts/wiusujo/licenses/actions/validate-key' -Headers $headers -Body $body
+        $isValid = $false
+        $message = 'Chave inválida.'
+        if ($response -and $response.data -and $response.data.attributes) {
+            $isValid = [bool]$response.data.attributes.valid
+            $message = if ($isValid) { 'Chave validada com sucesso.' } else { 'Chave inválida.' }
+        }
+        Save-LinaLicenseStatus -Key $Key -Valid $isValid -Message $message
+        return [pscustomobject]@{ valid = $isValid; message = $message }
+    } catch {
+        $msg = "Falha ao validar chave: $($_.Exception.Message)"
+        Save-LinaLicenseStatus -Key $Key -Valid $false -Message $msg
+        return [pscustomobject]@{ valid = $false; message = $msg }
+    }
 }
 
 function Get-LinaLocalizationLabels {
@@ -271,28 +379,29 @@ function Add-LinaDebloatActionLogs {
     }
 }
 
+$script:ServerPort = Get-LinaRandomPort
 $listener = New-Object System.Net.HttpListener
-$listener.Prefixes.Add('http://localhost:8787/')
-$listener.Prefixes.Add('http://0.0.0.0:8787/')
+$listener.Prefixes.Add("http://localhost:$script:ServerPort/")
+$listener.Prefixes.Add("http://0.0.0.0:$script:ServerPort/")
 try {
     $listener.Start()
-    Add-ServerLog 'Servidor iniciado em http://localhost:8787/'
+    Add-ServerLog "Servidor iniciado em http://localhost:$script:ServerPort/"
     try {
-        Start-Process 'http://localhost:8787/'
+        Start-Process "http://localhost:$script:ServerPort/"
     } catch {
         Add-ServerLog "Falha ao abrir navegador: $_"
     }
 } catch {
     Add-ServerLog "Falha ao iniciar HttpListener: $_"
-    Add-ServerLog 'Execute o PowerShell como Administrador ou rode: netsh http add urlacl url=http://+:8787/ user=Todos'
+    Add-ServerLog "Execute o PowerShell como Administrador ou rode: netsh http add urlacl url=http://+:$script:ServerPort/ user=Todos"
     $listener.Close()
     $listener = New-Object System.Net.HttpListener
-    $listener.Prefixes.Add('http://localhost:8787/')
+    $listener.Prefixes.Add("http://localhost:$script:ServerPort/")
     try {
         $listener.Start()
-        Add-ServerLog 'Servidor iniciado apenas em http://localhost:8787/ (fallback)'
+        Add-ServerLog "Servidor iniciado apenas em http://localhost:$script:ServerPort/ (fallback)"
         try {
-            Start-Process 'http://localhost:8787/'
+            Start-Process "http://localhost:$script:ServerPort/"
         } catch {
             Add-ServerLog "Falha ao abrir navegador: $_"
         }
@@ -408,7 +517,56 @@ while ($listener.IsListening) {
                     }
                     Add-ServerLog "Aplicado com sucesso: $($tweak.type) $($tweak.key)"
                 }
+                $appliedKeys = $data.tweaks | ForEach-Object { $_.key }
+                Add-LinaAppliedTweaks -Keys $appliedKeys
                 Send-Json -Response $response -Object @{ status = 'ok'; log = (Get-ServerLog) }
+            }
+            '^/api/revert$' {
+                $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)
+                $data = $body.ReadToEnd() | ConvertFrom-Json
+                $body.Close()
+                switch ($data.type) {
+                    'system' {
+                        Add-LinaSystemActionLogs -Key $data.key -Enabled $false
+                        Set-LinaSystemTweak -Key $data.key -Enabled:$false -WhatIf:$false
+                    }
+                    'network' {
+                        Add-LinaNetworkActionLogs -Key $data.key -Enabled $false
+                        Set-LinaNetworkTweak -Key $data.key -Enabled:$false -WhatIf:$false
+                    }
+                    'kernel' {
+                        Add-LinaKernelActionLogs -Key $data.key -Enabled $false
+                        Set-LinaKernelTweak -Key $data.key -Enabled:$false -WhatIf:$false
+                    }
+                    'debloat' {
+                        Add-ServerLog "Debloat não possui revert automático: $($data.key)"
+                    }
+                }
+                Remove-LinaAppliedTweaks -Keys @($data.key)
+                Add-ServerLog "Revertido com sucesso: $($data.type) $($data.key)"
+                Send-Json -Response $response -Object @{ status = 'ok'; log = (Get-ServerLog) }
+            }
+            '^/api/applied$' {
+                Send-Json -Response $response -Object (Get-LinaAppliedTweaks)
+            }
+            '^/api/license/status$' {
+                $status = Get-LinaLicenseStatus
+                if (-not $status) {
+                    Send-Json -Response $response -Object @{ valid = $false; message = 'Nenhuma licença salva.' }
+                } else {
+                    Send-Json -Response $response -Object $status
+                }
+            }
+            '^/api/license/validate$' {
+                $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)
+                $data = $body.ReadToEnd() | ConvertFrom-Json
+                $body.Close()
+                if (-not $data.key) {
+                    Send-Json -Response $response -Object @{ valid = $false; message = 'Chave não informada.' }
+                    break
+                }
+                $result = Invoke-LinaLicenseValidation -Key $data.key
+                Send-Json -Response $response -Object $result
             }
             '^/api/logs$' {
                 Send-Json -Response $response -Object (Get-ServerLog)

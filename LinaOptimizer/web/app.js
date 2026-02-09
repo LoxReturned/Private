@@ -14,6 +14,14 @@ const programModalHow = document.getElementById('programModalHow');
 const programModalWarn = document.getElementById('programModalWarn');
 const programDownload = document.getElementById('programDownload');
 const programClose = document.getElementById('programClose');
+const licenseModal = document.getElementById('licenseModal');
+const licenseBtn = document.getElementById('licenseBtn');
+const licenseTitle = document.getElementById('licenseTitle');
+const licenseDesc = document.getElementById('licenseDesc');
+const licenseKeyInput = document.getElementById('licenseKey');
+const licenseValidate = document.getElementById('licenseValidate');
+const licenseClose = document.getElementById('licenseClose');
+const licenseStatus = document.getElementById('licenseStatus');
 
 const translations = {
   'pt-BR': {
@@ -27,6 +35,21 @@ const translations = {
     heroDesc: 'Controle todas as otimizações via painel local. Cada tweak com descrição, risco e aplicação segura.',
     community: 'Comunidade',
     applyTweaks: 'Aplicar Tweaks',
+    revertTweaks: 'Reverter Tweaks',
+    license: {
+      label: 'Ativar Chave',
+      title: 'Ativação de Licença',
+      desc: 'Digite sua chave para validar.',
+      placeholder: 'XXXXX-XXXXX-XXXXX-XXXXX',
+      validate: 'Validar',
+      close: 'Fechar',
+      success: 'Chave validada com sucesso.',
+      failure: 'Chave inválida.'
+    },
+    tweaks: {
+      active: 'Ativo',
+      revert: 'Reverter'
+    },
     refreshHardware: 'Atualizar Hardware',
     restorePoint: 'Criar Ponto',
     restoreTitle: 'Criar ponto de restauração',
@@ -75,6 +98,21 @@ const translations = {
     heroDesc: 'Control all optimizations locally. Each tweak with description, risk and safe apply.',
     community: 'Community',
     applyTweaks: 'Apply Tweaks',
+    revertTweaks: 'Revert Tweaks',
+    license: {
+      label: 'Activate Key',
+      title: 'License Activation',
+      desc: 'Enter your key to validate.',
+      placeholder: 'XXXXX-XXXXX-XXXXX-XXXXX',
+      validate: 'Validate',
+      close: 'Close',
+      success: 'Key validated successfully.',
+      failure: 'Invalid key.'
+    },
+    tweaks: {
+      active: 'Active',
+      revert: 'Revert'
+    },
     refreshHardware: 'Refresh Hardware',
     restorePoint: 'Create Restore Point',
     restoreTitle: 'Create restore point',
@@ -123,6 +161,21 @@ const translations = {
     heroDesc: 'Controla todas las optimizaciones localmente. Cada ajuste con descripción, riesgo y aplicación segura.',
     community: 'Comunidad',
     applyTweaks: 'Aplicar Tweaks',
+    revertTweaks: 'Revertir Tweaks',
+    license: {
+      label: 'Activar Clave',
+      title: 'Activación de Licencia',
+      desc: 'Introduce tu clave para validar.',
+      placeholder: 'XXXXX-XXXXX-XXXXX-XXXXX',
+      validate: 'Validar',
+      close: 'Cerrar',
+      success: 'Clave validada correctamente.',
+      failure: 'Clave inválida.'
+    },
+    tweaks: {
+      active: 'Activo',
+      revert: 'Revertir'
+    },
     refreshHardware: 'Actualizar Hardware',
     restorePoint: 'Crear punto',
     restoreTitle: 'Crear punto de restauración',
@@ -171,6 +224,21 @@ const translations = {
     heroDesc: 'Steuere alle Optimierungen lokal. Jeder Tweak mit Beschreibung, Risiko und sicherer Anwendung.',
     community: 'Community',
     applyTweaks: 'Tweaks anwenden',
+    revertTweaks: 'Tweaks zurücksetzen',
+    license: {
+      label: 'Key aktivieren',
+      title: 'Lizenzaktivierung',
+      desc: 'Gib deinen Key zur Validierung ein.',
+      placeholder: 'XXXXX-XXXXX-XXXXX-XXXXX',
+      validate: 'Validieren',
+      close: 'Schließen',
+      success: 'Key erfolgreich validiert.',
+      failure: 'Ungültiger Key.'
+    },
+    tweaks: {
+      active: 'Aktiv',
+      revert: 'Zurücksetzen'
+    },
     refreshHardware: 'Hardware aktualisieren',
     restorePoint: 'Wiederherstellungspunkt',
     restoreTitle: 'Wiederherstellungspunkt erstellen',
@@ -255,6 +323,9 @@ function setLanguage(lang) {
   document.querySelector('#hero h1 .gradient-text').textContent = t.heroSubtitle;
   document.querySelector('#hero p').textContent = t.heroDesc;
   document.getElementById('applyTweaks').textContent = t.applyTweaks;
+  const revertBtn = document.getElementById('revertTweaks');
+  if (revertBtn) revertBtn.textContent = t.revertTweaks;
+  if (licenseBtn) licenseBtn.textContent = t.license.label;
   const restoreBtn = document.getElementById('restorePointBtn');
   if (restoreBtn) restoreBtn.textContent = t.restorePoint;
   document.querySelector('#tweaks .section-header p').textContent = t.panelLabel;
@@ -286,6 +357,11 @@ function setLanguage(lang) {
   if (programDownload) programDownload.textContent = t.programs.download;
   if (programClose) programClose.textContent = t.programs.close;
   if (tweakSearch) tweakSearch.placeholder = t.programs.search;
+  if (licenseTitle) licenseTitle.textContent = t.license.title;
+  if (licenseDesc) licenseDesc.textContent = t.license.desc;
+  if (licenseKeyInput) licenseKeyInput.placeholder = t.license.placeholder;
+  if (licenseValidate) licenseValidate.textContent = t.license.validate;
+  if (licenseClose) licenseClose.textContent = t.license.close;
 }
 
 function riskClass(risk) {
@@ -294,6 +370,8 @@ function riskClass(risk) {
   if (value.includes('médio') || value.includes('medio') || value.includes('medium') || value.includes('mittel')) return 'risk-medium';
   return 'risk-low';
 }
+
+let appliedTweaks = new Set();
 
 async function fetchTweaks() {
   const lang = langSelect ? langSelect.value : 'pt-BR';
@@ -355,11 +433,16 @@ async function fetchTweaks() {
       card.dataset.key = tweak.key;
       card.dataset.type = tweak.type;
       card.style.setProperty('--reveal-delay', `${Math.min(index, 6) * 0.05}s`);
-      if (isTweakApplied(tweak.key)) {
+      const isApplied = isTweakApplied(tweak.key);
+      if (isApplied) {
         card.classList.add('applied');
       } else if (selectedTweaks.has(tweak.key)) {
         card.classList.add('selected');
       }
+      const activeBadge = isApplied ? `<span class="tweak-badge">${t.tweaks.active}</span>` : '';
+      const revertButton = isApplied && tweak.type !== 'debloat'
+        ? `<button class="btn btn-secondary tweak-revert" data-key="${tweak.key}" data-type="${tweak.type}">${t.tweaks.revert}</button>`
+        : '';
       card.innerHTML = `
         <div class="toggle-bar"></div>
         <div class="tweak-body">
@@ -368,11 +451,20 @@ async function fetchTweaks() {
           <div class="tweak-meta">
             <span class="${riskClass(tweak.risk)}">${tweak.risk}</span>
             <span>${tweak.category}</span>
+            ${activeBadge}
           </div>
+          ${revertButton ? `<div class="tweak-actions">${revertButton}</div>` : ''}
         </div>
       `;
       grid.appendChild(card);
       registerReveal(card);
+      const revertBtn = card.querySelector('.tweak-revert');
+      if (revertBtn) {
+        revertBtn.addEventListener('click', async (event) => {
+          event.stopPropagation();
+          await revertTweak(revertBtn.dataset.key, revertBtn.dataset.type);
+        });
+      }
       card.addEventListener('click', () => {
         if (isTweakApplied(tweak.key)) {
           return;
@@ -440,6 +532,23 @@ async function applyTweaks() {
   systemLog.dataset.locked = 'true';
   markTweaksApplied(payload.map(item => item.key));
   selectedTweaks.clear();
+  fetchTweaks();
+}
+
+async function revertTweak(key, type) {
+  if (!key || !type) return;
+  const res = await fetch('/api/revert', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, type })
+  });
+  const result = await res.json();
+  if (systemLog && result?.log) {
+    systemLog.dataset.locked = 'true';
+    systemLog.textContent = result.log.join('\n');
+  }
+  appliedTweaks.delete(key);
+  localStorage.setItem('linaAppliedTweaks', JSON.stringify(Array.from(appliedTweaks)));
   fetchTweaks();
 }
 
@@ -1005,14 +1114,14 @@ function renderPrograms() {
 if (langSelect) {
   langSelect.addEventListener('change', () => {
     setLanguage(langSelect.value);
-    fetchTweaks();
+    fetchAppliedTweaks().finally(fetchTweaks);
     fetchGames();
     renderPrograms();
   });
 }
 
 setLanguage(langSelect ? langSelect.value : 'pt-BR');
-fetchTweaks();
+fetchAppliedTweaks().finally(fetchTweaks);
 fetchHardware();
 fetchGames();
 renderPrograms();
@@ -1020,6 +1129,16 @@ registerRevealElements();
 
 const applyBtn = document.getElementById('applyTweaks');
 applyBtn.addEventListener('click', applyTweaks);
+document.getElementById('revertTweaks')?.addEventListener('click', async () => {
+  const keys = Array.from(appliedTweaks);
+  for (const key of keys) {
+    const card = document.querySelector(`.tweak-card[data-key="${key}"]`);
+    if (!card) continue;
+    const type = card.dataset.type;
+    if (type === 'debloat') continue;
+    await revertTweak(key, type);
+  }
+});
 
 document.getElementById('refreshHardware')?.addEventListener('click', fetchHardware);
 
@@ -1153,14 +1272,69 @@ function getAppliedTweaks() {
 }
 
 function isTweakApplied(key) {
-  return getAppliedTweaks().includes(key);
+  return appliedTweaks.has(key);
 }
 
 function markTweaksApplied(keys) {
-  const current = new Set(getAppliedTweaks());
-  keys.forEach(key => current.add(key));
-  localStorage.setItem('linaAppliedTweaks', JSON.stringify(Array.from(current)));
+  keys.forEach(key => appliedTweaks.add(key));
+  localStorage.setItem('linaAppliedTweaks', JSON.stringify(Array.from(appliedTweaks)));
 }
+
+async function fetchAppliedTweaks() {
+  try {
+    const res = await fetch('/api/applied');
+    if (!res.ok) {
+      throw new Error('applied fetch failed');
+    }
+    const data = await res.json();
+    appliedTweaks = new Set(data || []);
+    localStorage.setItem('linaAppliedTweaks', JSON.stringify(Array.from(appliedTweaks)));
+  } catch {
+    appliedTweaks = new Set(getAppliedTweaks());
+  }
+}
+
+function openLicenseModal() {
+  if (!licenseModal) return;
+  licenseModal.classList.add('active');
+  licenseModal.setAttribute('aria-hidden', 'false');
+  if (licenseStatus) licenseStatus.textContent = '';
+  if (licenseKeyInput) {
+    licenseKeyInput.value = '';
+    licenseKeyInput.focus();
+  }
+}
+
+function closeLicenseModal() {
+  if (!licenseModal) return;
+  licenseModal.classList.remove('active');
+  licenseModal.setAttribute('aria-hidden', 'true');
+}
+
+licenseBtn?.addEventListener('click', openLicenseModal);
+licenseClose?.addEventListener('click', closeLicenseModal);
+licenseModal?.addEventListener('click', (event) => {
+  if (event.target === licenseModal) closeLicenseModal();
+});
+
+licenseValidate?.addEventListener('click', async () => {
+  const lang = langSelect ? langSelect.value : 'pt-BR';
+  const t = translations[lang] || translations['pt-BR'];
+  const key = licenseKeyInput?.value?.trim();
+  if (!key) {
+    if (licenseStatus) licenseStatus.textContent = t.license.failure;
+    return;
+  }
+  const res = await fetch('/api/license/validate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key })
+  });
+  const result = await res.json();
+  if (licenseStatus) {
+    licenseStatus.textContent = result.message || (result.valid ? t.license.success : t.license.failure);
+  }
+});
 
 const particleCanvas = document.getElementById('particleCanvas');
 const particleCtx = particleCanvas?.getContext('2d');

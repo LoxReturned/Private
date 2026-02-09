@@ -183,6 +183,21 @@
     .tweak-desc { color: var(--text-gray); font-size: 0.95rem; margin-bottom: 12px; opacity: 0; max-height: 0; transition: var(--transition); }
     .tweak-card:hover .tweak-desc { opacity: 1; max-height: 200px; }
     .tweak-meta { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--text-gray); margin-bottom: 12px; }
+    .tweak-actions { margin-top: 10px; display: flex; justify-content: center; }
+    .tweak-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(0, 243, 255, 0.12);
+      border: 1px solid rgba(0, 243, 255, 0.4);
+      color: #6dff7a;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
     .risk-low { color: #6dff7a; }
     .risk-medium { color: #ffe066; }
     .risk-high { color: #ff6b6b; }
@@ -303,6 +318,11 @@
       font-family: 'Rajdhani', sans-serif;
       margin-bottom: 16px;
     }
+    .license-status {
+      margin-top: 12px;
+      color: var(--text-gray);
+      font-size: 0.9rem;
+    }
     .modal-actions {
       display: flex;
       gap: 12px;
@@ -414,7 +434,9 @@
       <p>Controle todas as otimizações via painel local. Cada tweak com descrição, risco e aplicação segura.</p>
       <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
         <button class="btn btn-primary" id="applyTweaks">Aplicar Tweaks</button>
+        <button class="btn" id="revertTweaks" style="background: rgba(255,255,255,0.1); color: white;">Reverter Tweaks</button>
         <button class="btn" id="restorePointBtn" style="background: rgba(255,255,255,0.1); color: white;">Criar Ponto</button>
+        <button class="btn" id="licenseBtn" style="background: rgba(0,243,255,0.12); color: white; border: 1px solid rgba(0,243,255,0.4);">Ativar Chave</button>
       </div>
       <div id="hardwareInfo" class="log-panel reveal" style="margin-top: 24px;" data-i18n="hardwareLoading">Carregando hardware...</div>
     </div>
@@ -468,6 +490,19 @@
         <a id="programDownload" class="btn btn-primary" href="#" target="_blank" rel="noopener">Download</a>
         <button class="btn btn-secondary" id="programClose">Fechar</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="licenseModal" aria-hidden="true">
+    <div class="modal-card">
+      <h3 id="licenseTitle">Ativação de Licença</h3>
+      <p id="licenseDesc">Digite sua chave para validar.</p>
+      <input id="licenseKey" type="text" placeholder="XXXXX-XXXXX-XXXXX-XXXXX" />
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="licenseValidate">Validar</button>
+        <button class="btn btn-secondary" id="licenseClose">Fechar</button>
+      </div>
+      <div id="licenseStatus" class="license-status"></div>
     </div>
   </div>
 
