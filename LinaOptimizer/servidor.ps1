@@ -60,18 +60,18 @@ function Send-File {
 }
 
 function Get-LinaTweaksPayload {
-    $language = 'pt-BR'
-    $system = Get-LinaSystemTweaks -Language $language | ForEach-Object {
+    param([string]$Language = 'pt-BR')
+    $system = Get-LinaSystemTweaks -Language $Language | ForEach-Object {
         $group = Get-LinaCategoryGroup -Category $_.Category -Key $_.Key
         [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = $_.Category; group = $group; risk = $_.Risk; type = 'system' }
     }
-    $network = Get-LinaNetworkTweaks -Language $language | ForEach-Object {
+    $network = Get-LinaNetworkTweaks -Language $Language | ForEach-Object {
         [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Network'; group = 'internet'; risk = 'Médio'; type = 'network' }
     }
-    $kernel = Get-LinaKernelTweaks -Language $language | ForEach-Object {
+    $kernel = Get-LinaKernelTweaks -Language $Language | ForEach-Object {
         [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Kernel'; group = 'kernel'; risk = 'Alto'; type = 'kernel' }
     }
-    $debloat = Get-LinaDebloatModes -Language $language | ForEach-Object {
+    $debloat = Get-LinaDebloatModes -Language $Language | ForEach-Object {
         [pscustomobject]@{ key = $_.Key; title = $_.Title; description = $_.Description; category = 'Debloat'; group = 'debloat'; risk = 'Alto'; type = 'debloat' }
     }
     $system + $network + $kernel + $debloat
@@ -268,7 +268,9 @@ while ($listener.IsListening) {
                 Send-Json -Response $response -Object $info
             }
             '^/api/tweaks$' {
-                Send-Json -Response $response -Object (Get-LinaTweaksPayload)
+                $langParam = $request.QueryString['lang']
+                $langValue = if ([string]::IsNullOrWhiteSpace($langParam)) { 'pt-BR' } else { $langParam }
+                Send-Json -Response $response -Object (Get-LinaTweaksPayload -Language $langValue)
             }
             '^/api/games$' {
                 $games = Get-LinaGameProfiles -Language 'pt-BR' | ForEach-Object {

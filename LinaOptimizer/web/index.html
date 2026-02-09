@@ -191,7 +191,36 @@
       margin-top: 30px; background: #0b0b0b; border: 1px solid var(--glass-border); border-radius: 12px; padding: 16px;
       min-height: 120px; color: var(--text-gray); white-space: pre-wrap; font-size: 0.9rem;
     }
-    .category-bar { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 20px 0 90px; }
+    .category-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0 90px;
+    }
+    .tweak-search {
+      flex: 1;
+      min-width: 220px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(11, 11, 11, 0.9);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--text-white);
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .tweak-search input {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      outline: none;
+      width: 100%;
+      font-size: 1rem;
+    }
+    .category-bar { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
     .category-btn {
       padding: 10px 18px; border-radius: 30px; border: 1px solid var(--glass-border); color: var(--text-gray);
       background: rgba(255,255,255,0.05); cursor: pointer; font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
@@ -203,7 +232,7 @@
       font-family: 'Rajdhani', sans-serif;
     }
     .game-card { align-items: stretch; }
-    .game-card .game-info { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .game-card .game-info { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
     .game-card .tweak-title { font-size: 1.1rem; }
     .game-card .tweak-desc { margin-bottom: 0; opacity: 1; max-height: none; }
     .game-card .tweak-meta { margin-top: 0; }
@@ -267,6 +296,23 @@
       gap: 12px;
       justify-content: center;
       flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px) {
+      .nav-links { gap: 18px; flex-wrap: wrap; justify-content: center; }
+      .nav-container { flex-direction: column; gap: 12px; }
+      .tweak-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+      .category-row { gap: 12px; margin-bottom: 60px; }
+    }
+    @media (max-width: 600px) {
+      header { padding: 14px 0; }
+      .hero-content h1 { font-size: 2.6rem; }
+      .btn { width: 100%; }
+      .tweak-card { flex-direction: column; }
+      .toggle-bar { width: 100%; height: 6px; }
+      .category-row { flex-direction: column; align-items: stretch; }
+      .category-bar { justify-content: flex-start; }
+      .game-card .game-actions { flex-direction: column; }
     }
 
     .reveal {
@@ -343,7 +389,13 @@
         <p>PAINEL TÉCNICO</p>
         <h2>Seleção de <span class="gradient-text">Tweaks</span></h2>
       </div>
-      <div class="category-bar reveal" id="categoryBar"></div>
+      <div class="category-row reveal">
+        <div class="tweak-search">
+          <span>🔍</span>
+          <input id="tweakSearch" type="text" placeholder="Buscar tweaks" />
+        </div>
+        <div class="category-bar" id="categoryBar"></div>
+      </div>
       <div class="log-panel reveal" id="systemLog" data-i18n="systemLog">Logs aparecerão aqui.</div>
       <div id="tweakGrid" class="reveal"></div>
     </div>
@@ -358,6 +410,28 @@
       <div id="gamesGrid" class="tweak-grid reveal"></div>
     </div>
   </section>
+
+  <section id="programs">
+    <div class="container">
+      <div class="section-header reveal">
+        <p>PROGRAMAS</p>
+        <h2>Ferramentas <span class="gradient-text">Essenciais</span></h2>
+      </div>
+      <div id="programsGrid" class="tweak-grid reveal"></div>
+    </div>
+  </section>
+
+  <div class="modal-overlay" id="programModal" aria-hidden="true">
+    <div class="modal-card">
+      <h3 id="programModalTitle">Programa</h3>
+      <p id="programModalDesc">Descrição</p>
+      <p id="programModalHow">Instruções</p>
+      <div class="modal-actions">
+        <a id="programDownload" class="btn btn-primary" href="#" target="_blank" rel="noopener">Download</a>
+        <button class="btn btn-secondary" id="programClose">Fechar</button>
+      </div>
+    </div>
+  </div>
 
   <div class="modal-overlay" id="restoreModal" aria-hidden="true">
     <div class="modal-card">
