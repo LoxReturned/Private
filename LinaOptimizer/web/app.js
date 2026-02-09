@@ -5,6 +5,13 @@ const categoryBar = document.getElementById('categoryBar');
 const gamesGrid = document.getElementById('gamesGrid');
 const programsGrid = document.getElementById('programsGrid');
 const tweakSearch = document.getElementById('tweakSearch');
+const programModal = document.getElementById('programModal');
+const programModalTitle = document.getElementById('programModalTitle');
+const programModalDesc = document.getElementById('programModalDesc');
+const programModalHow = document.getElementById('programModalHow');
+const programModalCaution = document.getElementById('programModalCaution');
+const programDownload = document.getElementById('programDownload');
+const programClose = document.getElementById('programClose');
 const langSelect = document.getElementById('langSelect');
 const selectedTweaks = new Set();
 
@@ -492,26 +499,21 @@ async function fetchGames() {
 }
 
 const programs = [
-  { name: 'Process Lasso', desc: 'Gerencia prioridades e energia do sistema para reduzir stutter.', how: 'Abra e aplique o perfil “Bitsum Highest Performance” ao jogo.', url: 'https://bitsum.com/download-process-lasso/' },
-  { name: 'ISLC', desc: 'Limpa standby list para reduzir travamentos em jogos.', how: 'Configure 1024MB e inicie antes de jogar.', url: 'https://www.wagnardsoft.com/ISLCw' },
-  { name: 'MSI Afterburner', desc: 'Controle de GPU, fan curve e overlay.', how: 'Aplique fan curve e limites seguros.', url: 'https://www.msi.com/Landing/afterburner/graphics-cards' },
-  { name: 'RivaTuner Statistics Server', desc: 'Overlay de FPS e limitador de frame.', how: 'Defina limite FPS estável e OSD.', url: 'https://www.guru3d.com/files-details/rtss-rivatuner-statistics-server-download.html' },
-  { name: 'DDU', desc: 'Remove drivers de vídeo por completo.', how: 'Execute em modo seguro antes de reinstalar o driver.', url: 'https://www.wagnardsoft.com/' },
-  { name: 'NVCleanstall', desc: 'Instala drivers NVIDIA sem bloat.', how: 'Escolha componentes mínimos e instale.', url: 'https://www.techpowerup.com/nvcleanstall/' },
-  { name: 'NVIDIA Profile Inspector', desc: 'Ajuste profundo de perfis NVIDIA.', how: 'Abra e aplique perfil específico do jogo.', url: 'https://github.com/Orbmu2k/nvidiaProfileInspector/releases' },
-  { name: 'HWiNFO', desc: 'Monitoramento completo de hardware.', how: 'Use sensores para checar temperaturas.', url: 'https://www.hwinfo.com/download/' },
-  { name: 'CPU-Z', desc: 'Informações de CPU/placa-mãe.', how: 'Valide clocks e memória.', url: 'https://www.cpuid.com/softwares/cpu-z.html' },
-  { name: 'GPU-Z', desc: 'Detalhes de GPU e sensores.', how: 'Verifique clocks e VRAM.', url: 'https://www.techpowerup.com/gpuz/' },
-  { name: 'CrystalDiskInfo', desc: 'Saúde de SSD/HDD.', how: 'Verifique S.M.A.R.T e temperatura.', url: 'https://crystalmark.info/en/software/crystaldiskinfo/' },
-  { name: 'CrystalDiskMark', desc: 'Benchmark de armazenamento.', how: 'Teste velocidades antes/depois de tweaks.', url: 'https://crystalmark.info/en/software/crystaldiskmark/' },
-  { name: 'LatencyMon', desc: 'Diagnóstico de latência DPC.', how: 'Rode por 5-10 min e analise drivers.', url: 'https://www.resplendence.com/latencymon' },
-  { name: 'CapFrameX', desc: 'Medição de frametime e FPS.', how: 'Grave sessões e compare resultados.', url: 'https://www.capframex.com/' },
-  { name: 'HWMonitor', desc: 'Monitor simples de sensores.', how: 'Use para checar temperaturas rápidas.', url: 'https://www.cpuid.com/softwares/hwmonitor.html' },
-  { name: 'Autoruns', desc: 'Controle de inicialização do Windows.', how: 'Desative entradas não essenciais.', url: 'https://learn.microsoft.com/sysinternals/downloads/autoruns' },
-  { name: 'Process Explorer', desc: 'Visão avançada de processos.', how: 'Identifique processos com alto uso.', url: 'https://learn.microsoft.com/sysinternals/downloads/process-explorer' },
-  { name: 'ParkControl', desc: 'Gerencie core parking e energia.', how: 'Aplique perfil de performance.', url: 'https://bitsum.com/parkcontrol/' },
-  { name: 'O&O ShutUp10', desc: 'Controle de privacidade Windows.', how: 'Aplicar recomendações seguras.', url: 'https://www.oo-software.com/en/shutup10' },
-  { name: 'TCP Optimizer', desc: 'Ajustes simples de rede.', how: 'Use “Optimal” e reinicie.', url: 'https://www.speedguide.net/downloads.php' }
+  { name: 'DDU', desc: 'Remove drivers de vídeo por completo (limpeza profunda).', how: '1) Baixe. 2) Reinicie em modo seguro. 3) Execute o DDU e limpe o driver da GPU. 4) Reinicie e instale o driver novo.', caution: 'Use apenas quando houver problema com driver/instalação.', url: 'https://www.wagnardsoft.com/' },
+  { name: 'ISLC', desc: 'Limpa a standby list para reduzir stutter e travadinhas.', how: '1) Abra o ISLC. 2) Ajuste “Free memory is lower than…” para 1024MB. 3) “Wanted timer resolution” em 0.5. 4) Inicie com Windows. 5) Teste no jogo.', caution: 'Não é milagre; ajuda em stutter/memória standby.', url: 'https://www.wagnardsoft.com/ISLCw' },
+  { name: 'MSI Afterburner', desc: 'Monitoramento e ajuste leve de GPU.', how: '1) Abra o Afterburner. 2) Configure uma fan curve leve. 3) Monitore temps/uso. 4) Evite OC agressivo.', caution: '', url: 'https://www.msi.com/Landing/afterburner/graphics-cards' },
+  { name: 'RTSS', desc: 'Frame cap e OSD para FPS/frametime.', how: '1) Abra o RTSS. 2) Defina cap (ex: 141 para 144Hz). 3) Ative OSD. 4) Ajuste para reduzir tearing/stutter.', caution: '', url: 'https://www.guru3d.com/files-details/rtss-rivatuner-statistics-server-download.html' },
+  { name: 'HWiNFO', desc: 'Monitoramento real de sensores.', how: '1) Abra em “Sensors-only”. 2) Cheque temps e throttling. 3) Logue durante jogo para comparar.', caution: '', url: 'https://www.hwinfo.com/download/' },
+  { name: 'CapFrameX', desc: 'Benchmark de FPS/frametime.', how: '1) Inicie a captura. 2) Jogue 3–5 min. 3) Compare 1% low antes/depois de tweaks.', caution: '', url: 'https://www.capframex.com/' },
+  { name: 'Process Lasso', desc: 'CPU scheduling e modo performance por jogo.', how: '1) Abra o Process Lasso. 2) Ative “Performance Mode” apenas no executável do jogo. 3) Evite mexer em tudo.', caution: 'Mudanças exageradas podem piorar o desempenho.', url: 'https://bitsum.com/download-process-lasso/' },
+  { name: 'Autoruns', desc: 'Controle avançado de startups/serviços.', how: '1) Abra como admin. 2) Desative apenas o que conhece. 3) Crie restore point antes.', caution: 'Desativar item errado pode quebrar o sistema.', url: 'https://learn.microsoft.com/sysinternals/downloads/autoruns' },
+  { name: 'LatencyMon', desc: 'Diagnóstico de latência DPC.', how: '1) Execute durante jogo. 2) Identifique driver culpado. 3) Atualize/remova o driver.', caution: '', url: 'https://www.resplendence.com/latencymon' },
+  { name: 'NVCleanstall', desc: 'Instala driver NVIDIA sem bloat.', how: '1) Abra. 2) Selecione apenas o essencial. 3) Instale e reinicie.', caution: 'Não recomendado para iniciantes.', url: 'https://www.techpowerup.com/nvcleanstall/' },
+  { name: 'O&O ShutUp10++', desc: 'Privacidade/telemetria segura.', how: '1) Abra. 2) Aplique recomendações “Safe”. 3) Reinicie.', caution: 'Evite aplicar “all aggressive”.', url: 'https://www.oo-software.com/en/shutup10' },
+  { name: 'CrystalDiskInfo', desc: 'Saúde e SMART do disco.', how: '1) Abra. 2) Verifique SMART e temperatura. 3) Monitore alertas.', caution: '', url: 'https://crystalmark.info/en/software/crystaldiskinfo/' },
+  { name: '7-Zip', desc: 'Utilitário essencial de compactação.', how: '1) Instale. 2) Associe formatos. 3) Use para mods/packs.', caution: '', url: 'https://www.7-zip.org/' },
+  { name: 'Everything', desc: 'Busca instantânea de arquivos.', how: '1) Instale. 2) Deixe indexar. 3) Encontre configs/logs rápido.', caution: '', url: 'https://www.voidtools.com/' },
+  { name: 'DirectX & VC++', desc: 'Dependências de jogos (DLLs).', how: '1) Instale DirectX Runtime e VC++ Runtimes. 2) Reinicie. 3) Reabra o jogo.', caution: '', url: 'https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist' }
 ];
 
 function renderPrograms() {
@@ -602,18 +604,18 @@ restoreApply?.addEventListener('click', async () => {
   closeRestoreModal();
 });
 
-const programModal = document.getElementById('programModal');
-const programModalTitle = document.getElementById('programModalTitle');
-const programModalDesc = document.getElementById('programModalDesc');
-const programModalHow = document.getElementById('programModalHow');
-const programDownload = document.getElementById('programDownload');
-const programClose = document.getElementById('programClose');
-
 function openProgramModal(program) {
   if (!programModal) return;
   programModalTitle.textContent = program.name;
   programModalDesc.textContent = program.desc;
   programModalHow.textContent = program.how;
+  if (program.caution) {
+    programModalCaution.textContent = `Aviso: ${program.caution}`;
+    programModalCaution.style.display = 'block';
+  } else {
+    programModalCaution.textContent = '';
+    programModalCaution.style.display = 'none';
+  }
   programDownload.href = program.url;
   programModal.classList.add('active');
   programModal.setAttribute('aria-hidden', 'false');
