@@ -243,12 +243,32 @@ function Add-LinaDebloatActionLogs {
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add('http://localhost:8787/')
 $listener.Prefixes.Add('http://0.0.0.0:8787/')
-$listener.Start()
-Add-ServerLog 'Servidor iniciado em http://localhost:8787/'
 try {
-    Start-Process 'http://localhost:8787/'
+    $listener.Start()
+    Add-ServerLog 'Servidor iniciado em http://localhost:8787/'
+    try {
+        Start-Process 'http://localhost:8787/'
+    } catch {
+        Add-ServerLog "Falha ao abrir navegador: $_"
+    }
 } catch {
-    Add-ServerLog "Falha ao abrir navegador: $_"
+    Add-ServerLog "Falha ao iniciar HttpListener: $_"
+    Add-ServerLog 'Execute o PowerShell como Administrador ou rode: netsh http add urlacl url=http://+:8787/ user=Todos'
+    $listener.Close()
+    $listener = New-Object System.Net.HttpListener
+    $listener.Prefixes.Add('http://localhost:8787/')
+    try {
+        $listener.Start()
+        Add-ServerLog 'Servidor iniciado apenas em http://localhost:8787/ (fallback)'
+        try {
+            Start-Process 'http://localhost:8787/'
+        } catch {
+            Add-ServerLog "Falha ao abrir navegador: $_"
+        }
+    } catch {
+        Add-ServerLog "Falha ao iniciar HttpListener no fallback: $_"
+        throw
+    }
 }
 
 while ($listener.IsListening) {
