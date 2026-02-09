@@ -22,7 +22,6 @@ if (-not (Test-Path $script:LogRoot)) {
 $script:ServerLog = New-Object System.Collections.Concurrent.ConcurrentQueue[string]
 $script:ServerPort = $null
 $script:ServerPrefix = $null
-$script:LicenseValid = $false
 
 function Add-ServerLog {
     param([string]$Message)
@@ -60,43 +59,6 @@ function Send-File {
     $Response.ContentLength64 = $bytes.Length
     $Response.OutputStream.Write($bytes, 0, $bytes.Length)
     $Response.OutputStream.Close()
-}
-
-function Get-LinaLicenseValidationPayload {
-    param([string]$Key)
-    return @{
-        meta = @{
-            key = $Key
-            scope = @{
-                product = 'e05ccb07-37c9-4ef7-ba4c-fd60de1937f5'
-                policy = '054fbf1b-a35d-4f0b-8689-9fdbe4237b5b'
-            }
-        }
-    }
-}
-
-function Test-LinaLicenseKey {
-    param([string]$Key)
-    if ([string]::IsNullOrWhiteSpace($Key)) {
-        return [pscustomobject]@{ valid = $false; message = 'Chave inválida.' }
-    }
-    try {
-        $payload = Get-LinaLicenseValidationPayload -Key $Key | ConvertTo-Json -Depth 6
-        $headers = @{ Accept = 'application/vnd.api+json' }
-        $response = Invoke-RestMethod -Uri 'https://api.keygen.sh/v1/accounts/wiusujo/licenses/actions/validate-key' -Method Post -ContentType 'application/vnd.api+json' -Headers $headers -Body $payload
-        $valid = $false
-        if ($response -and $response.meta -and ($response.meta.valid -eq $true)) {
-            $valid = $true
-        }
-        $message = if ($valid) { 'Chave validada com sucesso.' } else { 'Chave inválida ou expirada.' }
-        return [pscustomobject]@{
-            valid = $valid
-            message = $message
-            meta = $response.meta
-        }
-    } catch {
-        return [pscustomobject]@{ valid = $false; message = "Falha ao validar chave: $($_.Exception.Message)" }
-    }
 }
 
 function Start-LinaListener {
@@ -370,31 +332,14 @@ while ($listener.IsListening) {
     $request = $context.Request
     $response = $context.Response
     $path = $request.Url.AbsolutePath
-    $isLicenseRoute = $path -match '^/license$' -or $path -match '^/license\\.html$' -or $path -match '^/license\\.js$'
-    $isLicenseApi = $path -match '^/api/license/validate$'
 
     try {
-        if (-not $script:LicenseValid -and -not ($isLicenseRoute -or $isLicenseApi)) {
-            $response.StatusCode = 302
-            $response.RedirectLocation = '/license'
-            $response.OutputStream.Close()
-            continue
-        }
         switch -Regex ($request.Url.AbsolutePath) {
             '^/$' {
                 Send-File -Response $response -Path (Join-Path $script:WebRoot 'index.html') -ContentType 'text/html; charset=utf-8'
             }
             '^/app.js$' {
                 Send-File -Response $response -Path (Join-Path $script:WebRoot 'app.js') -ContentType 'application/javascript; charset=utf-8'
-            }
-            '^/license$' {
-                Send-File -Response $response -Path (Join-Path $script:WebRoot 'license.html') -ContentType 'text/html; charset=utf-8'
-            }
-            '^/license.html$' {
-                Send-File -Response $response -Path (Join-Path $script:WebRoot 'license.html') -ContentType 'text/html; charset=utf-8'
-            }
-            '^/license.js$' {
-                Send-File -Response $response -Path (Join-Path $script:WebRoot 'license.js') -ContentType 'application/javascript; charset=utf-8'
             }
             '^/api/hardware$' {
                 try {
@@ -444,46 +389,11 @@ while ($listener.IsListening) {
                 Add-ServerLog "Revertido com sucesso: game $($data.gameKey)"
                 Send-Json -Response $response -Object @{ status = 'ok' }
             }
-            '^/api/restorepoint$' {
-                $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)
-                $data = $body.ReadToEnd() | ConvertFrom-Json
-                $body.Close()
-                $name = if ($data -and $data.name) { $data.name } else { 'Lina Optimizer Restore Point' }
-                $restore = New-LinaRestorePoint -Name $name -WhatIf:$false
-                if ($restore -and $restore.Message) {
-                    Add-ServerLog $restore.Message
-                }
-                Send-Json -Response $response -Object @{ status = if ($restore.Success) { 'ok' } else { 'error' }; message = $restore.Message }
-            }
-            '^/api/license/validate$' {
-                $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)
-                $data = $body.ReadToEnd() | ConvertFrom-Json
-                $body.Close()
-                $key = if ($data -and $data.key) { $data.key } else { '' }
-                $result = Test-LinaLicenseKey -Key $key
-                $script:LicenseValid = [bool]$result.valid
-                Send-Json -Response $response -Object $result
-                if (-not $script:LicenseValid) {
-                    Add-ServerLog 'Licença inválida. Encerrando servidor.'
-                    $listener.Stop()
-                    $listener.Close()
-                } else {
-                    Add-ServerLog 'Licença validada. Acesso liberado.'
-                }
-            }
             '^/api/apply$' {
                 $body = New-Object IO.StreamReader($request.InputStream, $request.ContentEncoding)
                 $data = $body.ReadToEnd() | ConvertFrom-Json
                 $body.Close()
                 Add-ServerLog 'Aplicando tweaks selecionados'
-                try {
-                    $restore = New-LinaRestorePoint -WhatIf:$false
-                    if ($restore -and $restore.Message) {
-                        Add-ServerLog $restore.Message
-                    }
-                } catch {
-                    Add-ServerLog "Restore point falhou: $_"
-                }
                 foreach ($tweak in $data.tweaks) {
                     switch ($tweak.type) {
                         'system' {

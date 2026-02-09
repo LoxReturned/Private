@@ -1,4 +1,4 @@
-﻿const tweakGrid = document.getElementById('tweakGrid');
+const tweakGrid = document.getElementById('tweakGrid');
 const systemLog = document.getElementById('systemLog');
 const hardwareInfo = document.getElementById('hardwareInfo');
 const categoryBar = document.getElementById('categoryBar');
@@ -29,11 +29,6 @@ const translations = {
     community: 'Comunidade',
     applyTweaks: 'Aplicar Tweaks',
     refreshHardware: 'Atualizar Hardware',
-    restorePoint: 'Criar Ponto',
-    restoreTitle: 'Criar ponto de restauração',
-    restoreDesc: 'Digite um nome para o ponto de restauração.',
-    restoreApply: 'Aplicar',
-    restoreClose: 'Fechar',
     hardwareLoading: 'Carregando hardware...',
     panelTitle: 'Seleção de Tweaks',
     panelLabel: 'PAINEL TÉCNICO',
@@ -79,11 +74,6 @@ const translations = {
     community: 'Community',
     applyTweaks: 'Apply Tweaks',
     refreshHardware: 'Refresh Hardware',
-    restorePoint: 'Create Restore Point',
-    restoreTitle: 'Create restore point',
-    restoreDesc: 'Enter a name for the restore point.',
-    restoreApply: 'Apply',
-    restoreClose: 'Close',
     hardwareLoading: 'Loading hardware...',
     panelTitle: 'Tweak Selection',
     panelLabel: 'TECH PANEL',
@@ -129,11 +119,6 @@ const translations = {
     community: 'Comunidad',
     applyTweaks: 'Aplicar Tweaks',
     refreshHardware: 'Actualizar Hardware',
-    restorePoint: 'Crear punto',
-    restoreTitle: 'Crear punto de restauración',
-    restoreDesc: 'Introduce un nombre para el punto de restauración.',
-    restoreApply: 'Aplicar',
-    restoreClose: 'Cerrar',
     hardwareLoading: 'Cargando hardware...',
     panelTitle: 'Selección de Tweaks',
     panelLabel: 'PANEL TÉCNICO',
@@ -179,11 +164,6 @@ const translations = {
     community: 'Community',
     applyTweaks: 'Tweaks anwenden',
     refreshHardware: 'Hardware aktualisieren',
-    restorePoint: 'Wiederherstellungspunkt',
-    restoreTitle: 'Wiederherstellungspunkt erstellen',
-    restoreDesc: 'Geben Sie einen Namen für den Wiederherstellungspunkt ein.',
-    restoreApply: 'Anwenden',
-    restoreClose: 'Schließen',
     hardwareLoading: 'Hardware wird geladen...',
     panelTitle: 'Tweak-Auswahl',
     panelLabel: 'TECH-PANEL',
@@ -264,8 +244,6 @@ function setLanguage(lang) {
   document.querySelector('#hero h1 .gradient-text').textContent = t.heroSubtitle;
   document.querySelector('#hero p').textContent = t.heroDesc;
   document.getElementById('applyTweaks').textContent = t.applyTweaks;
-  const restoreBtn = document.getElementById('restorePointBtn');
-  if (restoreBtn) restoreBtn.textContent = t.restorePoint;
   document.querySelector('#tweaks .section-header p').textContent = t.panelLabel;
   setGradientTitle(document.querySelector('#tweaks .section-header h2'), t.panelTitle);
   document.querySelector('#games .section-header p').textContent = t.gameLabel;
@@ -276,14 +254,6 @@ function setLanguage(lang) {
   if (hardwareInfo && !hardwareInfo.dataset.loaded) {
     hardwareInfo.textContent = t.hardwareLoading;
   }
-  const modalTitle = document.getElementById('restoreModalTitle');
-  const modalDesc = document.getElementById('restoreModalDesc');
-  const modalApply = document.getElementById('restoreApply');
-  const modalClose = document.getElementById('restoreClose');
-  if (modalTitle) modalTitle.textContent = t.restoreTitle;
-  if (modalDesc) modalDesc.textContent = t.restoreDesc;
-  if (modalApply) modalApply.textContent = t.restoreApply;
-  if (modalClose) modalClose.textContent = t.restoreClose;
   document.querySelectorAll('[data-i18n="footerDesc"]').forEach(el => el.textContent = t.footerDesc);
   document.querySelectorAll('[data-i18n="footerCredits"]').forEach(el => el.textContent = t.footerCredits);
   document.querySelectorAll('[data-i18n="footerResponsible"]').forEach(el => el.textContent = t.footerResponsible);
@@ -768,25 +738,25 @@ const programs = [
         name: 'Autoruns (Sysinternals)',
         category: 'Startup / Serviços',
         desc: 'Desativa entradas de inicialização desnecessárias.',
-        how: '1) Abra como admin.\n2) Aguarde o scan.\n3) Desmarque entradas inúteis.\n4) Crie restore point antes.\n5) Reinicie e valide.'
+        how: '1) Abra como admin.\n2) Aguarde o scan.\n3) Desmarque entradas inúteis.\n4) Crie um backup antes.\n5) Reinicie e valide.'
       },
       'en-US': {
         name: 'Autoruns (Sysinternals)',
         category: 'Startup / Services',
         desc: 'Disables unnecessary startup entries.',
-        how: '1) Run as admin.\n2) Wait for the scan.\n3) Uncheck unneeded entries.\n4) Create a restore point first.\n5) Reboot and verify.'
+        how: '1) Run as admin.\n2) Wait for the scan.\n3) Uncheck unneeded entries.\n4) Create a backup first.\n5) Reboot and verify.'
       },
       'es-ES': {
         name: 'Autoruns (Sysinternals)',
         category: 'Inicio / Servicios',
         desc: 'Desactiva entradas de inicio innecesarias.',
-        how: '1) Ábrelo como admin.\n2) Espera el escaneo.\n3) Desmarca entradas innecesarias.\n4) Crea un punto de restauración antes.\n5) Reinicia y verifica.'
+        how: '1) Ábrelo como admin.\n2) Espera el escaneo.\n3) Desmarca entradas innecesarias.\n4) Crea un backup antes.\n5) Reinicia y verifica.'
       },
       'de-DE': {
         name: 'Autoruns (Sysinternals)',
         category: 'Autostart / Dienste',
         desc: 'Deaktiviert unnötige Autostart-Einträge.',
-        how: '1) Als Admin starten.\n2) Scan abwarten.\n3) Unnötige Einträge abwählen.\n4) Vorher einen Wiederherstellungspunkt erstellen.\n5) Neustarten und prüfen.'
+        how: '1) Als Admin starten.\n2) Scan abwarten.\n3) Unnötige Einträge abwählen.\n4) Vorher ein Backup erstellen.\n5) Neustarten und prüfen.'
       }
     }
   },
@@ -1060,50 +1030,6 @@ applyBtn.addEventListener('click', applyTweaks);
 
 document.getElementById('refreshHardware')?.addEventListener('click', fetchHardware);
 
-const restoreModal = document.getElementById('restoreModal');
-const restorePointBtn = document.getElementById('restorePointBtn');
-const restoreClose = document.getElementById('restoreClose');
-const restoreApply = document.getElementById('restoreApply');
-const restorePointName = document.getElementById('restorePointName');
-
-function openRestoreModal() {
-  if (!restoreModal) return;
-  restoreModal.classList.add('active');
-  restoreModal.setAttribute('aria-hidden', 'false');
-  if (restorePointName) {
-    restorePointName.value = '';
-    restorePointName.focus();
-  }
-}
-
-function closeRestoreModal() {
-  if (!restoreModal) return;
-  restoreModal.classList.remove('active');
-  restoreModal.setAttribute('aria-hidden', 'true');
-}
-
-restorePointBtn?.addEventListener('click', openRestoreModal);
-restoreClose?.addEventListener('click', closeRestoreModal);
-restoreModal?.addEventListener('click', (event) => {
-  if (event.target === restoreModal) {
-    closeRestoreModal();
-  }
-});
-
-restoreApply?.addEventListener('click', async () => {
-  const name = restorePointName?.value?.trim() || 'Lina Optimizer Restore Point';
-  const res = await fetch('/api/restorepoint', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name })
-  });
-  const result = await res.json();
-  if (systemLog) {
-    systemLog.dataset.locked = 'true';
-    systemLog.textContent = result.message || 'Restore point processado.';
-  }
-  closeRestoreModal();
-});
 
 function openProgramModal(program) {
   if (!programModal) return;
@@ -1270,7 +1196,7 @@ function drawParticles() {
           : 1;
         const alpha = (1 - dist / particleSettings.linkDistance) * 0.4 * pointerFactor;
         if (alpha > 0) {
-          particleCtx.strokeStyle = `rgba(0, 243, 255, ${alpha})`;
+          particleCtx.strokeStyle = `rgba(205, 127, 50, ${alpha})`;
           particleCtx.beginPath();
           particleCtx.moveTo(a.x, a.y);
           particleCtx.lineTo(b.x, b.y);
@@ -1284,7 +1210,7 @@ function drawParticles() {
     const dist = Math.sqrt((p.x - pointer.x) ** 2 + (p.y - pointer.y) ** 2);
     const alpha = dist < particleSettings.repelRadius ? 0 : 0.5;
     if (alpha > 0) {
-      particleCtx.fillStyle = `rgba(0, 243, 255, ${alpha})`;
+      particleCtx.fillStyle = `rgba(205, 127, 50, ${alpha})`;
       particleCtx.beginPath();
       particleCtx.arc(p.x, p.y, particleSettings.radius, 0, Math.PI * 2);
       particleCtx.fill();
