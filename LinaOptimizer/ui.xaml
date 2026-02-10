@@ -1,0 +1,175 @@
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Lina Optimizer"
+        Width="1200" Height="740"
+        WindowStartupLocation="CenterScreen"
+        Background="#0B1521"
+        AllowsTransparency="True"
+        WindowStyle="None">
+    <Window.Effect>
+        <DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="#33A0FF" Opacity="0.8"/>
+    </Window.Effect>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Background="#101B2A" Grid.Column="0" Padding="16">
+            <StackPanel>
+                <TextBlock Text="Lina Optimizer" FontSize="20" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                <TextBlock Text="Extreme Windows & Gaming Optimizer" Foreground="#7AA8D6" FontSize="11" Margin="0,0,0,20"/>
+                <ListBox x:Name="NavList" Background="Transparent" BorderThickness="0">
+                    <ListBoxItem Content="Dashboard" Tag="Dashboard"/>
+                    <ListBoxItem Content="Sistema / System" Tag="Sistema"/>
+                    <ListBoxItem Content="Jogos / Games" Tag="Jogos"/>
+                    <ListBoxItem Content="Rede / Network" Tag="Rede"/>
+                    <ListBoxItem Content="Debloat" Tag="Debloat"/>
+                    <ListBoxItem Content="Kernel" Tag="Kernel"/>
+                    <ListBoxItem Content="Energia / Power" Tag="Energia"/>
+                    <ListBoxItem Content="Backup" Tag="Backup"/>
+                    <ListBoxItem Content="Avançado / Advanced" Tag="Avancado"/>
+                    <ListBoxItem Content="Discord" Tag="Discord"/>
+                </ListBox>
+                <TextBlock x:Name="ToastText" Text="Pronto / Ready" Foreground="#9EC9FF" Margin="0,16,0,0" FontSize="12" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Column="1" Margin="24">
+            <Grid.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Padding" Value="12,6"/>
+                    <Setter Property="Background" Value="#16324A"/>
+                    <Setter Property="Foreground" Value="#E7F3FF"/>
+                    <Setter Property="BorderBrush" Value="#2D5D88"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Style>
+                <Style TargetType="ToggleButton">
+                    <Setter Property="Width" Value="52"/>
+                    <Setter Property="Height" Value="26"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ToggleButton">
+                                <Grid>
+                                    <Border x:Name="Track" Background="#2A3D52" CornerRadius="13"/>
+                                    <Ellipse x:Name="Knob" Width="22" Height="22" Fill="#9EC9FF" Margin="2" HorizontalAlignment="Left"/>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter TargetName="Track" Property="Background" Value="#1A77FF"/>
+                                        <Setter TargetName="Knob" Property="Margin" Value="28,2,2,2"/>
+                                        <Setter TargetName="Knob" Property="Fill" Value="#E7F3FF"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Grid.Resources>
+
+            <Grid x:Name="DashboardView">
+                <StackPanel>
+                    <TextBlock Text="Smart Detection / Detecção inteligente" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF"/>
+                    <UniformGrid Columns="3" Margin="0,16,0,16">
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel><TextBlock Text="Windows" Foreground="#9EC9FF"/><TextBlock x:Name="DashWindows" Foreground="#E7F3FF"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel><TextBlock Text="CPU" Foreground="#9EC9FF"/><TextBlock x:Name="DashCPU" Foreground="#E7F3FF"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel><TextBlock Text="GPU" Foreground="#9EC9FF"/><TextBlock x:Name="DashGPU" Foreground="#E7F3FF"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel><TextBlock Text="RAM" Foreground="#9EC9FF"/><TextBlock x:Name="DashRAM" Foreground="#E7F3FF"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel><TextBlock Text="SSD" Foreground="#9EC9FF"/><TextBlock x:Name="DashSSD" Foreground="#E7F3FF"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel><TextBlock Text="Rede / Network" Foreground="#9EC9FF"/><TextBlock x:Name="DashNetwork" Foreground="#E7F3FF"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel><TextBlock Text="Conta / Account" Foreground="#9EC9FF"/><TextBlock x:Name="DashAccount" Foreground="#E7F3FF"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel><TextBlock Text="BIOS" Foreground="#9EC9FF"/><TextBlock x:Name="DashBIOS" Foreground="#E7F3FF"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel><TextBlock Text="Driver" Foreground="#9EC9FF"/><TextBlock x:Name="DashDriver" Foreground="#E7F3FF"/></StackPanel></Border>
+                    </UniformGrid>
+                    <Button x:Name="ContinueButton" Content="▶ Continuar / Continue" Width="220"/>
+                </StackPanel>
+            </Grid>
+
+            <ScrollViewer x:Name="SystemView" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Sistema / System" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                    <UniformGrid Columns="2">
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch"><TextBlock Text="Desativar Telemetria / Disable Telemetry" Foreground="#E7F3FF" Width="320"/><ToggleButton x:Name="ToggleTelemetry"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel Orientation="Horizontal"><TextBlock Text="Desativar Animações / Disable Animations" Foreground="#E7F3FF" Width="320"/><ToggleButton x:Name="ToggleAnimations"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel Orientation="Horizontal"><TextBlock Text="Desativar GameDVR / Disable GameDVR" Foreground="#E7F3FF" Width="320"/><ToggleButton x:Name="ToggleGameDVR"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel Orientation="Horizontal"><TextBlock Text="Desativar Indexação / Disable Indexing" Foreground="#E7F3FF" Width="320"/><ToggleButton x:Name="ToggleIndexing"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel Orientation="Horizontal"><TextBlock Text="Desativar Edge Background" Foreground="#E7F3FF" Width="320"/><ToggleButton x:Name="ToggleEdgeBg"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel Orientation="Horizontal"><TextBlock Text="Desativar Serviços Inúteis / Disable Services" Foreground="#E7F3FF" Width="320"/><ToggleButton x:Name="ToggleServices"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel Orientation="Horizontal"><TextBlock Text="Otimizar Timer / Optimize Timer" Foreground="#E7F3FF" Width="320"/><ToggleButton x:Name="ToggleTimer"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel Orientation="Horizontal"><TextBlock Text="MSI Mode" Foreground="#E7F3FF" Width="320"/><ToggleButton x:Name="ToggleMSI"/></StackPanel></Border>
+                        <Border Background="#142233" Margin="6" Padding="12" CornerRadius="10"><StackPanel Orientation="Horizontal"><TextBlock Text="HPET Off" Foreground="#E7F3FF" Width="320"/><ToggleButton x:Name="ToggleHPET"/></StackPanel></Border>
+                    </UniformGrid>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="GamesView" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Jogos / Games" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                    <WrapPanel x:Name="GamesPanel"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="NetworkView" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Rede / Network" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                    <TextBlock Text="TCPNoDelay, Ack Frequency, QoS, Buffers, Interrupt Moderation" Foreground="#9EC9FF" Margin="0,0,0,12"/>
+                    <Button x:Name="ApplyNetwork" Content="Aplicar Tweaks / Apply Tweaks" Width="260"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="DebloatView" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Debloat Windows" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="DebloatLight" Content="Leve / Light" Margin="0,0,8,0"/>
+                        <Button x:Name="DebloatMedium" Content="Médio / Medium" Margin="0,0,8,0"/>
+                        <Button x:Name="DebloatNuclear" Content="Nuclear"/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="KernelView" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Kernel / Boot" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                    <TextBlock Text="HPET OFF, Dynamic Tick OFF, Mitigations OFF, CET OFF, DEP/CFG OFF, Core Parking OFF" Foreground="#9EC9FF" Margin="0,0,0,12"/>
+                    <Button x:Name="ApplyKernel" Content="Aplicar Kernel / Apply Kernel" Width="260"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="PowerView" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Energia / Power" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                    <TextBlock Text="CPU 100%, PCIe Off, USB Suspend Off, Sleep/Hibernate Off, GPU Max" Foreground="#9EC9FF" Margin="0,0,0,12"/>
+                    <Button x:Name="ApplyPower" Content="Criar Power Plan / Create Plan" Width="260"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="BackupView" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Backup & Restore" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="CreateRestore" Content="Restore Point" Margin="0,0,8,0"/>
+                        <Button x:Name="BackupRegistry" Content="Backup Registry" Margin="0,0,8,0"/>
+                        <Button x:Name="BackupConfigs" Content="Backup Configs" Margin="0,0,8,0"/>
+                        <Button x:Name="RestoreAll" Content="Restore Tudo / Restore All"/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="AdvancedView" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Avançado / Advanced" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                    <TextBlock Text="Modo Simulação (-WhatIf) disponível no código para rollback seguro." Foreground="#9EC9FF" TextWrapping="Wrap"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="DiscordView" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Discord" FontSize="24" FontWeight="Bold" Foreground="#E7F3FF" Margin="0,0,0,12"/>
+                    <Button x:Name="JoinDiscord" Content="Entrar no Discord / Join Discord" Width="260"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>
